@@ -1,0 +1,1327 @@
+[
+    {
+        "type": "constructor",
+        "inputs": [
+            {
+                "name": "_entityRegistry",
+                "type": "address",
+                "internalType": "contract EntityKeyRegistry"
+            }
+        ],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "DEFAULT_ADMIN_ROLE",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "ENTITY_KEY_REGISTRY",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract EntityKeyRegistry"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "PARALLEL_REQUESTS_UPPER_LIMIT",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "PROOF_MARKET_PLACE_ROLE",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "UNLOCK_WAIT_BLOCKS",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "UPGRADE_INTERFACE_VERSION",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "string",
+                "internalType": "string"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "addIvsKey",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "attestationData",
+                "type": "bytes",
+                "internalType": "bytes"
+            },
+            {
+                "name": "enclaveSignature",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "assignGeneratorTask",
+        "inputs": [
+            {
+                "name": "askId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "generatorAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "changeRewardAddress",
+        "inputs": [
+            {
+                "name": "newRewardAddress",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "completeGeneratorTask",
+        "inputs": [
+            {
+                "name": "askId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "generatorAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "stakeToRelease",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "decreaseDeclaredCompute",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "deregister",
+        "inputs": [],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "generatorInfoPerMarket",
+        "inputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "state",
+                "type": "uint8",
+                "internalType": "enum GeneratorRegistry.GeneratorState"
+            },
+            {
+                "name": "computePerRequestRequired",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "proofGenerationCost",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "proposedTime",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "activeRequests",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "generatorRegistry",
+        "inputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "rewardAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "sumOfComputeAllocations",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "computeConsumed",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "activeMarketplaces",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "declaredCompute",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "intendedComputeUtilization",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "generatorData",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getGeneratorAssignmentDetails",
+        "inputs": [
+            {
+                "name": "generatorAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getGeneratorRewardDetails",
+        "inputs": [
+            {
+                "name": "generatorAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getGeneratorState",
+        "inputs": [
+            {
+                "name": "generatorAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint8",
+                "internalType": "enum GeneratorRegistry.GeneratorState"
+            },
+            {
+                "name": "",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "getRoleAdmin",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "grantRole",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            },
+            {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "hasRole",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            },
+            {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "increaseDeclaredCompute",
+        "inputs": [
+            {
+                "name": "computeToIncrease",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "initialize",
+        "inputs": [
+            {
+                "name": "_admin",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_proofMarketplace",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "_stakingManager",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "intendToReduceCompute",
+        "inputs": [
+            {
+                "name": "computeToReduce",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "joinMarketplace",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "computePerRequestRequired",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "proofGenerationCost",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "proposedTime",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "updateMarketDedicatedKey",
+                "type": "bool",
+                "internalType": "bool"
+            },
+            {
+                "name": "attestationData",
+                "type": "bytes",
+                "internalType": "bytes"
+            },
+            {
+                "name": "enclaveSignature",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "leaveMarketplace",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "leaveMarketplaces",
+        "inputs": [
+            {
+                "name": "marketIds",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "proofMarketplace",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "contract ProofMarketplace"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "proxiableUUID",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "register",
+        "inputs": [
+            {
+                "name": "rewardAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "declaredCompute",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "generatorData",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "releaseGeneratorResources",
+        "inputs": [
+            {
+                "name": "generatorAddress",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "removeEncryptionKey",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "renounceRole",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            },
+            {
+                "name": "callerConfirmation",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "requestForExitMarketplace",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "requestForExitMarketplaces",
+        "inputs": [
+            {
+                "name": "marketIds",
+                "type": "uint256[]",
+                "internalType": "uint256[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "revokeRole",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            },
+            {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "stakingManager",
+        "inputs": [],
+        "outputs": [
+            {
+                "name": "",
+                "type": "address",
+                "internalType": "address"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "supportsInterface",
+        "inputs": [
+            {
+                "name": "interfaceId",
+                "type": "bytes4",
+                "internalType": "bytes4"
+            }
+        ],
+        "outputs": [
+            {
+                "name": "",
+                "type": "bool",
+                "internalType": "bool"
+            }
+        ],
+        "stateMutability": "view"
+    },
+    {
+        "type": "function",
+        "name": "updateEncryptionKey",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "internalType": "uint256"
+            },
+            {
+                "name": "attestationData",
+                "type": "bytes",
+                "internalType": "bytes"
+            },
+            {
+                "name": "enclaveSignature",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    },
+    {
+        "type": "function",
+        "name": "upgradeToAndCall",
+        "inputs": [
+            {
+                "name": "newImplementation",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "data",
+                "type": "bytes",
+                "internalType": "bytes"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    {
+        "type": "event",
+        "name": "AddIvsKey",
+        "inputs": [
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "signer",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "ChangedGeneratorRewardAddress",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "newRewardAddress",
+                "type": "address",
+                "indexed": false,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "ComputeLockImposed",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "stake",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "ComputeLockReleased",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "stake",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "DecreaseCompute",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "compute",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "DeregisteredGenerator",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "IncreasedCompute",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "compute",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Initialized",
+        "inputs": [
+            {
+                "name": "version",
+                "type": "uint64",
+                "indexed": false,
+                "internalType": "uint64"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "JoinedMarketplace",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            },
+            {
+                "name": "computeAllocation",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "LeftMarketplace",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RegisteredGenerator",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "initialCompute",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RequestComputeDecrease",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "intendedUtilization",
+                "type": "uint256",
+                "indexed": false,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RequestExitMarketplace",
+        "inputs": [
+            {
+                "name": "generator",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "marketId",
+                "type": "uint256",
+                "indexed": true,
+                "internalType": "uint256"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RoleAdminChanged",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "indexed": true,
+                "internalType": "bytes32"
+            },
+            {
+                "name": "previousAdminRole",
+                "type": "bytes32",
+                "indexed": true,
+                "internalType": "bytes32"
+            },
+            {
+                "name": "newAdminRole",
+                "type": "bytes32",
+                "indexed": true,
+                "internalType": "bytes32"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RoleGranted",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "indexed": true,
+                "internalType": "bytes32"
+            },
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "sender",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "RoleRevoked",
+        "inputs": [
+            {
+                "name": "role",
+                "type": "bytes32",
+                "indexed": true,
+                "internalType": "bytes32"
+            },
+            {
+                "name": "account",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            },
+            {
+                "name": "sender",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "event",
+        "name": "Upgraded",
+        "inputs": [
+            {
+                "name": "implementation",
+                "type": "address",
+                "indexed": true,
+                "internalType": "address"
+            }
+        ],
+        "anonymous": false
+    },
+    {
+        "type": "error",
+        "name": "AccessControlBadConfirmation",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "AccessControlUnauthorizedAccount",
+        "inputs": [
+            {
+                "name": "account",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "name": "neededRole",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "AddressEmptyCode",
+        "inputs": [
+            {
+                "name": "target",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "AlreadyJoinedMarket",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "AssignOnlyToIdleGenerators",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "CannotBeMoreThanDeclaredCompute",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "CannotBeSlashed",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "CannotBeZero",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "CannotLeaveMarketWithActiveRequest",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "CannotLeaveWithActiveMarket",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ECDSAInvalidSignature",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ECDSAInvalidSignatureLength",
+        "inputs": [
+            {
+                "name": "length",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "ECDSAInvalidSignatureS",
+        "inputs": [
+            {
+                "name": "s",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "ERC1967InvalidImplementation",
+        "inputs": [
+            {
+                "name": "implementation",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "ERC1967NonPayable",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ExceedsAcceptableRange",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "FailedInnerCall",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "GeneratorAlreadyExists",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "IncorrectImageId",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InsufficientGeneratorComputeAvailable",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidEnclaveKey",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidEnclaveSignature",
+        "inputs": [
+            {
+                "name": "invalidSignerAddress",
+                "type": "address",
+                "internalType": "address"
+            }
+        ]
+    },
+    {
+        "type": "error",
+        "name": "InvalidGenerator",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidGeneratorStatePerMarket",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidInitialization",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "InvalidMarket",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "MaxParallelRequestsPerMarketExceeded",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "NotInitializing",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "OnlyValidGeneratorsCanRequestExit",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "OnlyWorkingGenerators",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "PublicMarketsDontNeedKey",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ReduceComputeRequestNotInPlace",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ReductionRequestNotValid",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "ReentrancyGuardReentrantCall",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "RequestAlreadyInPlace",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "UUPSUnauthorizedCallContext",
+        "inputs": []
+    },
+    {
+        "type": "error",
+        "name": "UUPSUnsupportedProxiableUUID",
+        "inputs": [
+            {
+                "name": "slot",
+                "type": "bytes32",
+                "internalType": "bytes32"
+            }
+        ]
+    }
+]

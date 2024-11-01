@@ -1,15 +1,15 @@
 specVersion: 0.0.5
-description: 'example of a subgraph'
-repository: https://github.com/graphprotocol/graph-tooling.git
+description: 'Subgraph for calculating Points for Kalypso Operators and their delegators'
+repository: 
 schema:
   file: ./schema.graphql
 dataSources:
   - kind: ethereum/contract
-    name: ExampleSubgraph
-    network: mainnet
+    name: ProofMarketplace
+    network: arbitrum-sepolia
     source:
       address: '0x22843e74c59580b3eaf6c233fa67d8b7c561a835'
-      abi: ExampleContract
+      abi: ProofMarketplace
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -19,8 +19,56 @@ dataSources:
         - ExampleEntity
         - OtherEntity
       abis:
-        - name: ExampleContract
-          file: ./abis/ExampleContract.json
+        - name: ProofMarketplace
+          file: ./abis/ProofMarketplace.json
       eventHandlers:
-        - event: ExampleEvent(indexed string)
-          handler: handleExampleEvent
+        - event: OperatorRewardShareSet(indexed address,uint256)
+          handler: handleOperatorRewardShareSet
+        - event: ProofCreated(indexed uint256,bytes)
+          handler: handleProofCreated
+        - event: TaskCreated(indexed uint256,indexed address,bytes)
+          handler: handleTaskCreated
+        - event: Initialized(uint64)
+          handler: handleInitialized
+  - kind: ethereum/contract
+    name: SymbioticStaking
+    network: arbitrum-sepolia
+    source:
+      address: '0x22843e74c59580b3eaf6c233fa67d8b7c561a835'
+      abi: SymbioticStaking
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - ExampleEntity
+        - OtherEntity
+      abis:
+        - name: SymbioticStaking
+          file: ./abis/SymbioticStaking.json
+      eventHandlers:
+        - event: SnapshotConfirmed(indexed address,uint256)
+          handler: handleSnapshotConfirmed
+        - event: VaultSnapshotSubmitted(indexed address,uint256,uint256,bytes,bytes)
+          handler: handleVaultSnapshotSubmitted
+  - kind: ethereum/contract
+    name: GeneratorRegistry
+    network: arbitrum-sepolia
+    source:
+      address: '0x22843e74c59580b3eaf6c233fa67d8b7c561a835'
+      abi: GeneratorRegistry
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      file: ./src/mapping.ts
+      entities:
+        - ExampleEntity
+        - OtherEntity
+      abis:
+        - name: GeneratorRegistry
+          file: ./abis/GeneratorRegistry.json
+      eventHandlers:
+        - event: RegisteredGenerator(indexed address,uint256)
+          handler: handleRegisteredGenerator

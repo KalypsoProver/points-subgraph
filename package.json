@@ -2,12 +2,11 @@
   "name": "kalypso-points-subgraph",
   "private": true,
   "scripts": {
-    "build": "../../packages/cli/bin/run build subgraph.yaml",
-    "build-ipfs": "../../packages/cli/bin/run build --ipfs /ip4/127.0.0.1/tcp/5001 subgraph.yaml",
-    "build-wast": "../../packages/cli/bin/run build -t wast subgraph.yaml",
-    "codegen": "../../packages/cli/bin/run codegen --output-dir src/types/ subgraph.yaml"
+    "build": "graph build",
+    "codegen": "graph codegen"
   },
   "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.87.0",
     "@graphprotocol/graph-ts": "0.35.1"
   }
 }

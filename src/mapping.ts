@@ -1,272 +1,126 @@
-import { Address, BigInt, Bytes, log, store } from '@graphprotocol/graph-ts';
-import { ExampleContract, ExampleEvent } from './types/ExampleSubgraph/ExampleContract';
-import { ExampleEntity } from './types/schema';
+import { Address, BigInt, Bytes, log, store, ethereum } from '@graphprotocol/graph-ts';
+import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch } from '../generated/schema';
+import { ProofCreated, OperatorRewardShareSet, Initialized, TaskCreated } from '../generated/ProofMarketplace/ProofMarketplace';
+import { SnapshotConfirmed, VaultSnapshotSubmitted } from '../generated/SymbioticStaking/SymbioticStaking';
+import { RegisteredGenerator } from '../generated/GeneratorRegistry/GeneratorRegistry';
 
-export function handleExampleEvent(event: ExampleEvent): void {
-  const entity = new ExampleEntity('example id');
+import { EPOCH_LENGTH, GLOBAL_STATE_ID, POINTS_PER_EPOCH, START_TIME,  } from './constants';
+import { getCurrentEpoch, getEncodedInput } from './utils';
 
-  // Entity field access
+// Check if the epoch is over before running any function
+// If the epoch is over, calculate the rewards for each user and the generator and distribute them
 
-  entity.optionalBoolean = true;
-  entity.optionalBoolean = false;
-  entity.optionalBooleanList = [true, false];
-  entity.optionalBooleanList = null;
+export function handleRegisteredGenerator(event: RegisteredGenerator): void {
+    let generator = Generator.load(event.params.generator.toHexString());
+    if (generator == null) {
+        generator = new Generator(event.params.generator.toHexString());
+        generator.address = event.params.generator.toHexString();
+        generator.save();
+    }
+}
 
-  const optionalBoolean: boolean = entity.optionalBoolean;
-  const optionalBooleanList: Array<boolean> | null = entity.optionalBooleanList;
+// Record the commission of the generator
+export function handleOperatorRewardShareSet(event: OperatorRewardShareSet): void {
+    let generator = Generator.load(event.params.operator.toHexString());
+    if (generator == null) {
+        log.warning('Generator not found when setting operator reward share', [event.params.operator.toHexString()]);
+        return;
+    }
 
-  entity.requiredBoolean = true;
-  entity.requiredBoolean = false;
-  entity.requiredBooleanList = [true, false];
+    generator.commission = event.params.rewardShare;
+    generator.save();
+}
 
-  const requiredBoolean: boolean = entity.requiredBoolean;
-  const requiredBooleanList: Array<boolean> = entity.requiredBooleanList;
+export function handleTaskCreated(event: TaskCreated): void {
+    let task = Task.load(event.params.askId.toString());
+    if (task == null) {
+        task = new Task(event.params.askId.toString());
+        task.assignedAt = event.block.timestamp;
+        task.generator = event.params.generator.toHexString();
+        task.epoch = getCurrentEpoch(event.block.timestamp);
+        task.save();
+    }
+}
 
-  entity.optionalString = 'hello';
-  entity.optionalString = null;
-  entity.optionalStringList = ['hello', 'world'];
-  entity.optionalStringList = null;
+// Each time a job is completed, record it against jobs completed for that epoch
+export function handleProofCreated(event: ProofCreated): void {
 
-  const optionalString: string | null = entity.optionalString;
-  const optionalStringList: Array<string> | null = entity.optionalStringList;
+    let currentTimestamp = event.block.timestamp;
+    const epoch = getCurrentEpoch(currentTimestamp);
 
-  entity.requiredString = 'hello';
-  entity.requiredStringList = ['hello', 'world'];
+    let task = Task.load(event.params.askId.toString());
+    if (task == null) {
+        log.error('Task not found for askId when proof was generated', [event.params.askId.toString()]);
+        return;
+    }
 
-  const requiredString: string = entity.requiredString;
-  const requiredStringList: Array<string> = entity.requiredStringList;
+    task.completedAt = event.block.timestamp;
+    task.save();
 
-  entity.optionalInt = 128;
-  entity.optionalInt = -500;
-  entity.optionalInt = null;
-  entity.optionalIntList = [128, -500];
-  entity.optionalIntList = null;
+    // add count of jobs completed for this epoch to the generator
+    let jobsPerEpoch = JobsPerEpoch.load(epoch.toString() + '-' + task.generator);
+    if (jobsPerEpoch == null) {
+        jobsPerEpoch = new JobsPerEpoch(epoch.toString() + '-' + task.generator);
+        jobsPerEpoch.address = task.generator;
+        jobsPerEpoch.epoch = epoch;
+        jobsPerEpoch.jobCount = BigInt.fromI32(0);
+    }
 
-  const optionalInt: i32 = entity.optionalInt;
-  const optionalIntList: Array<i32> | null = entity.optionalIntList;
+    jobsPerEpoch.jobCount = jobsPerEpoch.jobCount.plus(BigInt.fromI32(1));
+    jobsPerEpoch.save();
 
-  entity.requiredInt = 128;
-  entity.requiredInt = -500;
-  entity.requiredIntList = [128, -500];
+    // add count of jobs completed for this epoch to the global epoch state
+    let globalJobsPerEpoch = TotalJobsPerEpoch.load(epoch.toString());
+    if (globalJobsPerEpoch == null) {
+        globalJobsPerEpoch = new TotalJobsPerEpoch(epoch.toString());
+        globalJobsPerEpoch.index = GLOBAL_STATE_ID;
+        globalJobsPerEpoch.epoch = epoch;
+        globalJobsPerEpoch.jobCount = BigInt.fromI32(0);
+    }
 
-  const requiredInt: i32 = entity.requiredInt;
-  const requiredIntList: Array<i32> = entity.requiredIntList;
+    globalJobsPerEpoch.jobCount = globalJobsPerEpoch.jobCount.plus(BigInt.fromI32(1));
+    globalJobsPerEpoch.save();
+}
 
-  entity.optionalBigInt = new BigInt(0);
-  entity.optionalBigInt = null;
-  entity.optionalBigIntList = [new BigInt(0), new BigInt(0)];
-  entity.optionalBigIntList = null;
+// Every time snapshot is submitted, record the delegations of users
+export function handleSnapshotConfirmed(event: SnapshotConfirmed): void {
+    
+}
 
-  const optionalBigInt: BigInt | null = entity.optionalBigInt;
-  const optionalBigIntList: Array<BigInt> | null = entity.optionalBigIntList;
+export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): void {
+    // Note: Assuming that snapshot is always submitted by EOA
+    const data = event.transaction.input;
+    const inputData = getEncodedInput(data);
+    const decoded = ethereum.decode("(uint256,uint256,uint256,bytes32,bytes,bytes)", inputData);
+    if(decoded == null) {
+        log.error('Failed to decode snapshot data', []);
+        return;
+    }
+    const snapshotData = decoded[4].toString();
+    const snapshotDataDecoded = ethereum.decode("((address,address,address,uint256)[])", snapshotData);
+    if(snapshotDataDecoded == null) {
+        log.error('Failed to decode snapshot data', []);
+        return;
+    }
 
-  entity.requiredBigInt = new BigInt(0);
-  entity.requiredBigIntList = [new BigInt(0), new BigInt(0)];
+    for(let i=0; i<snapshotDataDecoded[0].length; i++) {
+        let generator = snapshotDataDecoded[0][i].value0.toHexString();
+        let user = snapshotDataDecoded[0][i].value1.toHexString();
+        let token = snapshotDataDecoded[0][i].value2.toHexString();
+        let amount = snapshotDataDecoded[0][i].value3;
 
-  const requiredBigInt: BigInt = entity.requiredBigInt;
-  const requiredBigIntList: Array<BigInt> = entity.requiredBigIntList;
+        let userDelegation = JobsPerEpoch.load(user + '-' + GLOBAL_STATE_ID);
+    }
+}
 
-  entity.optionalBytes = new Bytes(0);
-  entity.optionalBytes = null;
-  entity.optionalBytesList = [new Bytes(0), new Bytes(0)];
-  entity.optionalBytesList = null;
-
-  const optionalBytes: Bytes | null = entity.optionalBytes;
-  const optionalBytesList: Array<Bytes> | null = entity.optionalBytesList;
-
-  entity.requiredBytes = new Bytes(0);
-  entity.requiredBytesList = [new Bytes(0), new Bytes(0)];
-
-  const requiredBytes: Bytes = entity.requiredBytes;
-  const requiredBytesList: Array<Bytes> = entity.requiredBytesList;
-
-  entity.optionalReference = 'some-id';
-  entity.optionalReference = null;
-  entity.optionalReferenceList = ['some-id', 'other-id'];
-  entity.optionalReferenceList = null;
-
-  const optionalReference: string | null = entity.optionalReference;
-  const optionalReferenceList: Array<string> | null = entity.optionalReferenceList;
-
-  entity.requiredReference = 'some-id';
-  entity.requiredReferenceList = ['some-id', 'other-id'];
-
-  const requiredReference: string = entity.requiredReference;
-  const requiredReferenceList: Array<string> = entity.requiredReferenceList;
-
-  // Smart contract calls
-
-  const contract = ExampleContract.bind(event.address);
-  entity.requiredBytes = contract.getAndReturnAddress(entity.requiredBytes as Address);
-  entity.requiredString = contract.getAndReturnString(entity.requiredString);
-  entity.requiredBoolean = contract.getAndReturnBool(entity.requiredBoolean);
-  entity.requiredBytes = contract.getAndReturnByte(entity.requiredBytes);
-  entity.requiredBytes = contract.getAndReturnBytes1(entity.requiredBytes);
-  entity.requiredBytes = contract.getAndReturnBytes32(entity.requiredBytes);
-  entity.requiredInt = contract.getAndReturnInt8(entity.requiredInt);
-  entity.requiredInt = contract.getAndReturnInt16(entity.requiredInt);
-  entity.requiredInt = contract.getAndReturnInt24(entity.requiredInt);
-  entity.requiredInt = contract.getAndReturnInt32(entity.requiredInt);
-  entity.requiredBigInt = contract.getAndReturnInt40(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt56(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt64(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt72(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt80(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt88(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt96(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt104(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt112(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt120(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt128(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt136(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt144(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt152(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt160(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt168(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt176(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt184(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt192(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt200(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt200(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt208(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt216(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt224(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt232(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt240(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt248(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnInt256(entity.requiredBigInt);
-  entity.requiredInt = contract.getAndReturnUint8(entity.requiredInt);
-  entity.requiredInt = contract.getAndReturnUint16(entity.requiredInt);
-  entity.requiredInt = contract.getAndReturnUint24(entity.requiredInt);
-  entity.requiredBigInt = contract.getAndReturnUint32(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint40(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint56(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint64(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint72(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint80(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint88(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint96(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint104(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint112(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint120(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint128(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint136(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint144(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint152(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint160(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint168(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint176(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint184(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint192(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint200(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint200(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint208(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint216(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint224(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint232(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint240(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint248(entity.requiredBigInt);
-  entity.requiredBigInt = contract.getAndReturnUint256(entity.requiredBigInt);
-
-  const addrArray: Array<Address> = contract.getAndReturnAddressArray([
-    new Address(0),
-    new Address(0),
-  ]);
-  entity.requiredStringList = contract.getAndReturnStringArray(entity.requiredStringList);
-  entity.requiredBooleanList = contract.getAndReturnBoolArray(entity.requiredBooleanList);
-  entity.requiredBytesList = contract.getAndReturnByteArray(entity.requiredBytesList);
-  entity.requiredBytesList = contract.getAndReturnBytes1Array(entity.requiredBytesList);
-  entity.requiredBytesList = contract.getAndReturnBytes32Array(entity.requiredBytesList);
-  entity.requiredIntList = contract.getAndReturnInt8Array(entity.requiredIntList);
-  entity.requiredIntList = contract.getAndReturnInt16Array(entity.requiredIntList);
-  entity.requiredIntList = contract.getAndReturnInt24Array(entity.requiredIntList);
-  contract.getAndReturnInt32Array(entity.requiredIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt40Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt56Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt64Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt72Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt80Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt88Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt96Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt104Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt112Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt120Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt128Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt136Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt144Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt152Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt160Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt168Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt176Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt184Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt192Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt200Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt200Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt208Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt216Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt224Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt232Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt240Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt248Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnInt256Array(entity.requiredBigIntList);
-  const u8Array: Array<i32> = contract.getAndReturnUint8Array([1 as i32, 100 as i32]);
-  const u16Array: Array<i32> = contract.getAndReturnUint16Array([1 as i32, 100 as i32]);
-  const u24Array: Array<i32> = contract.getAndReturnUint24Array([1 as i32, 100 as i32]);
-  const u32Array: Array<BigInt> = contract.getAndReturnUint32Array([new BigInt(0), new BigInt(0)]);
-  entity.requiredBigIntList = contract.getAndReturnUint40Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint56Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint64Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint72Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint80Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint88Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint96Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint104Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint112Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint120Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint128Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint136Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint144Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint152Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint160Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint168Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint176Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint184Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint192Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint200Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint200Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint208Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint216Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint224Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint232Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint240Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint248Array(entity.requiredBigIntList);
-  entity.requiredBigIntList = contract.getAndReturnUint256Array(entity.requiredBigIntList);
-
-  // Store access
-
-  store.set('ExampleEntity', 'example id', entity);
-  store.get('ExampleEntity', 'example id');
-  store.remove('ExampleEntity', 'example id');
-
-  // Entity load and save (using the store behind the scenes)
-  entity.save();
-  let other = ExampleEntity.load('other example id');
-  if (other == null) {
-    other = new ExampleEntity('other example id');
-  }
-  other.save();
-
-  // BigInt math
-  const bigIntPlus = entity.requiredBigInt + entity.requiredBigInt;
-  const bigIntMinus = entity.requiredBigInt - entity.requiredBigInt;
-  const bigIntTimes = entity.requiredBigInt * entity.requiredBigInt;
-  const bigIntDividedBy = entity.requiredBigInt / entity.requiredBigInt;
-  const bigIntMod = entity.requiredBigInt % entity.requiredBigInt;
-
-  // Logging
-  log.debug('Hello {}', ['World']);
-  log.info('Hello {}', ['World']);
-  log.warning('Hello {}', ['World']);
-  log.error('Hello {}', ['World']);
-  log.critical('Hello {}', ['World']);
+// pick a start time and define an epoch as 1 day
+export function handleInitialized(event: Initialized): void {
+    let globalState = GlobalState.load(GLOBAL_STATE_ID);
+    if (globalState == null) {
+        globalState = new GlobalState(GLOBAL_STATE_ID);
+        globalState.pointsPerEpoch = POINTS_PER_EPOCH;
+        globalState.startTime = START_TIME;
+        globalState.epochLength = EPOCH_LENGTH;
+        globalState.save();
+    }
 }

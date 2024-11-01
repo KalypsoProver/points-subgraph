@@ -1,37 +1,64 @@
-type ExampleEntity @entity {
+type GlobalState @entity {
   id: ID!
-
-  optionalBoolean: Boolean
-  requiredBoolean: Boolean!
-  optionalBooleanList: [Boolean!]
-  requiredBooleanList: [Boolean!]!
-
-  optionalString: String
-  requiredString: String!
-  optionalStringList: [String!]
-  requiredStringList: [String!]!
-
-  optionalBytes: Bytes
-  requiredBytes: Bytes!
-  optionalBytesList: [Bytes!]
-  requiredBytesList: [Bytes!]!
-
-  optionalInt: Int
-  requiredInt: Int!
-  optionalIntList: [Int!]
-  requiredIntList: [Int!]!
-
-  optionalBigInt: BigInt
-  requiredBigInt: BigInt!
-  optionalBigIntList: [BigInt!]
-  requiredBigIntList: [BigInt!]!
-
-  optionalReference: OtherEntity
-  requiredReference: OtherEntity!
-  optionalReferenceList: [OtherEntity!]
-  requiredReferenceList: [OtherEntity!]!
+  pointsPerEpoch: BigInt!
+  startTime: BigInt!
+  epochLength: BigInt!
+  pointsDistributedTillEpoch: BigInt!
+  jobsByEpoch: [TotalJobsPerEpoch!]! @derivedFrom(field: "index")
+  generators: [User!]!
+  Users: [User!]!
 }
 
-type OtherEntity @entity {
+type Task @entity {
   id: ID!
+  epoch: BigInt!
+  generator: Generator!
+  assignedAt: BigInt!
+  completedAt: BigInt
+}
+
+type TotalJobsPerEpoch @entity {
+  id: ID!
+  index: GlobalState!
+  epoch: BigInt!
+  jobCount: BigInt!
+}
+
+type Generator @entity {
+  id: ID!
+  address: String!
+  commission: BigInt!
+  tasks: [Task!]! @derivedFrom(field: "generator")
+  delegations: [Delegation!]! @derivedFrom(field: "generator")
+  jobsByEpoch: [JobsPerEpoch!]! @derivedFrom(field: "address")
+  totalDelegation: [TotalDelegation!]! @derivedFrom(field: "generator")
+}
+
+type Delegation @entity {
+  id: ID!
+  generator: Generator!
+  delegator: User!
+  token: String!
+  amount: BigInt!
+  lastUpdatedEpoch: BigInt!
+}
+
+type TotalDelegation @entity {
+  id: ID!
+  generator: Generator!
+  token: String!
+  amount: BigInt!
+}
+
+type JobsPerEpoch @entity {
+  id: ID!
+  address: Generator!
+  epoch: BigInt!
+  jobCount: BigInt!
+}
+
+type User @entity {
+  id: ID!
+  address: String!
+  points: BigInt!
 }
