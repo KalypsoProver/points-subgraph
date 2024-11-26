@@ -52,7 +52,7 @@ dataSources:
       eventHandlers:
         - event: SnapshotConfirmed(indexed address,uint256)
           handler: handleSnapshotConfirmed
-        - event: VaultSnapshotSubmitted(indexed address,uint256,uint256,bytes,bytes)
+        - event: VaultSnapshotSubmitted(indexed address,indexed uint256,uint256,uint256,indexed bytes32,bytes,bytes)
           handler: handleVaultSnapshotSubmitted
         - event: StakeLocked(indexed uint256,indexed address,indexed address,uint256)
           handler: handleStakeLocked

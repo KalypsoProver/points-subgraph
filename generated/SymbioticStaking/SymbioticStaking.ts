@@ -32,6 +32,24 @@ export class AmountToLockSet__Params {
   }
 }
 
+export class AttestationVerifierSet extends ethereum.Event {
+  get params(): AttestationVerifierSet__Params {
+    return new AttestationVerifierSet__Params(this);
+  }
+}
+
+export class AttestationVerifierSet__Params {
+  _event: AttestationVerifierSet;
+
+  constructor(event: AttestationVerifierSet) {
+    this._event = event;
+  }
+
+  get attestationVerifier(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+}
+
 export class BaseTransmitterComissionRateSet extends ethereum.Event {
   get params(): BaseTransmitterComissionRateSet__Params {
     return new BaseTransmitterComissionRateSet__Params(this);
@@ -47,6 +65,54 @@ export class BaseTransmitterComissionRateSet__Params {
 
   get rate(): BigInt {
     return this._event.parameters[0].value.toBigInt();
+  }
+}
+
+export class EnclaveImageAdded extends ethereum.Event {
+  get params(): EnclaveImageAdded__Params {
+    return new EnclaveImageAdded__Params(this);
+  }
+}
+
+export class EnclaveImageAdded__Params {
+  _event: EnclaveImageAdded;
+
+  constructor(event: EnclaveImageAdded) {
+    this._event = event;
+  }
+
+  get imageId(): Bytes {
+    return this._event.parameters[0].value.toBytes();
+  }
+
+  get PCR0(): Bytes {
+    return this._event.parameters[1].value.toBytes();
+  }
+
+  get PCR1(): Bytes {
+    return this._event.parameters[2].value.toBytes();
+  }
+
+  get PCR2(): Bytes {
+    return this._event.parameters[3].value.toBytes();
+  }
+}
+
+export class EnclaveImageRemoved extends ethereum.Event {
+  get params(): EnclaveImageRemoved__Params {
+    return new EnclaveImageRemoved__Params(this);
+  }
+}
+
+export class EnclaveImageRemoved__Params {
+  _event: EnclaveImageRemoved;
+
+  constructor(event: EnclaveImageRemoved) {
+    this._event = event;
+  }
+
+  get imageId(): Bytes {
+    return this._event.parameters[0].value.toBytes();
   }
 }
 
@@ -247,20 +313,28 @@ export class SlashResultSubmitted__Params {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get index(): BigInt {
+  get captureTimestamp(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get numOfTxs(): BigInt {
+  get index(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
 
-  get slashResultData(): Bytes {
-    return this._event.parameters[3].value.toBytes();
+  get numOfTxs(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
   }
 
-  get signature(): Bytes {
+  get imageId(): Bytes {
     return this._event.parameters[4].value.toBytes();
+  }
+
+  get slashResultData(): Bytes {
+    return this._event.parameters[5].value.toBytes();
+  }
+
+  get proof(): Bytes {
+    return this._event.parameters[6].value.toBytes();
   }
 }
 
@@ -479,20 +553,28 @@ export class VaultSnapshotSubmitted__Params {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get index(): BigInt {
+  get captureTimestamp(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 
-  get numOfTxs(): BigInt {
+  get index(): BigInt {
     return this._event.parameters[2].value.toBigInt();
   }
 
-  get vaultSnapshotData(): Bytes {
-    return this._event.parameters[3].value.toBytes();
+  get numOfTxs(): BigInt {
+    return this._event.parameters[3].value.toBigInt();
   }
 
-  get signature(): Bytes {
+  get imageId(): Bytes {
     return this._event.parameters[4].value.toBytes();
+  }
+
+  get vaultSnapshotData(): Bytes {
+    return this._event.parameters[5].value.toBytes();
+  }
+
+  get proof(): Bytes {
+    return this._event.parameters[6].value.toBytes();
   }
 }
 
@@ -538,6 +620,38 @@ export class SymbioticStaking__confirmedTimestampsResult {
   }
 
   getTransmitterComissionRate(): BigInt {
+    return this.value2;
+  }
+}
+
+export class SymbioticStaking__enclaveImagesResult {
+  value0: Bytes;
+  value1: Bytes;
+  value2: Bytes;
+
+  constructor(value0: Bytes, value1: Bytes, value2: Bytes) {
+    this.value0 = value0;
+    this.value1 = value1;
+    this.value2 = value2;
+  }
+
+  toMap(): TypedMap<string, ethereum.Value> {
+    let map = new TypedMap<string, ethereum.Value>();
+    map.set("value0", ethereum.Value.fromBytes(this.value0));
+    map.set("value1", ethereum.Value.fromBytes(this.value1));
+    map.set("value2", ethereum.Value.fromBytes(this.value2));
+    return map;
+  }
+
+  getPCR0(): Bytes {
+    return this.value0;
+  }
+
+  getPCR1(): Bytes {
+    return this.value1;
+  }
+
+  getPCR2(): Bytes {
     return this.value2;
   }
 }
@@ -636,6 +750,29 @@ export class SymbioticStaking extends ethereum.SmartContract {
     return new SymbioticStaking("SymbioticStaking", address);
   }
 
+  BRIDGE_ENCLAVE_UPDATES_ROLE(): Bytes {
+    let result = super.call(
+      "BRIDGE_ENCLAVE_UPDATES_ROLE",
+      "BRIDGE_ENCLAVE_UPDATES_ROLE():(bytes32)",
+      [],
+    );
+
+    return result[0].toBytes();
+  }
+
+  try_BRIDGE_ENCLAVE_UPDATES_ROLE(): ethereum.CallResult<Bytes> {
+    let result = super.tryCall(
+      "BRIDGE_ENCLAVE_UPDATES_ROLE",
+      "BRIDGE_ENCLAVE_UPDATES_ROLE():(bytes32)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBytes());
+  }
+
   COMPLETE_MASK(): Bytes {
     let result = super.call("COMPLETE_MASK", "COMPLETE_MASK():(bytes32)", []);
 
@@ -676,6 +813,52 @@ export class SymbioticStaking extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBytes());
+  }
+
+  I_GENERATOR_CALLBACK(): Address {
+    let result = super.call(
+      "I_GENERATOR_CALLBACK",
+      "I_GENERATOR_CALLBACK():(address)",
+      [],
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_I_GENERATOR_CALLBACK(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "I_GENERATOR_CALLBACK",
+      "I_GENERATOR_CALLBACK():(address)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  SIGNATURE_LENGTH(): BigInt {
+    let result = super.call(
+      "SIGNATURE_LENGTH",
+      "SIGNATURE_LENGTH():(uint256)",
+      [],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_SIGNATURE_LENGTH(): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "SIGNATURE_LENGTH",
+      "SIGNATURE_LENGTH():(uint256)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
   SLASH_RESULT_MASK(): Bytes {
@@ -814,6 +997,29 @@ export class SymbioticStaking extends ethereum.SmartContract {
     return ethereum.CallResult.fromValue(value[0].toBigInt());
   }
 
+  attestationVerifier(): Address {
+    let result = super.call(
+      "attestationVerifier",
+      "attestationVerifier():(address)",
+      [],
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_attestationVerifier(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "attestationVerifier",
+      "attestationVerifier():(address)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
   baseTransmitterComissionRate(): BigInt {
     let result = super.call(
       "baseTransmitterComissionRate",
@@ -907,6 +1113,41 @@ export class SymbioticStaking extends ethereum.SmartContract {
     );
   }
 
+  enclaveImages(imageId: Bytes): SymbioticStaking__enclaveImagesResult {
+    let result = super.call(
+      "enclaveImages",
+      "enclaveImages(bytes32):(bytes,bytes,bytes)",
+      [ethereum.Value.fromFixedBytes(imageId)],
+    );
+
+    return new SymbioticStaking__enclaveImagesResult(
+      result[0].toBytes(),
+      result[1].toBytes(),
+      result[2].toBytes(),
+    );
+  }
+
+  try_enclaveImages(
+    imageId: Bytes,
+  ): ethereum.CallResult<SymbioticStaking__enclaveImagesResult> {
+    let result = super.tryCall(
+      "enclaveImages",
+      "enclaveImages(bytes32):(bytes,bytes,bytes)",
+      [ethereum.Value.fromFixedBytes(imageId)],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(
+      new SymbioticStaking__enclaveImagesResult(
+        value[0].toBytes(),
+        value[1].toBytes(),
+        value[2].toBytes(),
+      ),
+    );
+  }
+
   feeRewardToken(): Address {
     let result = super.call("feeRewardToken", "feeRewardToken():(address)", []);
 
@@ -924,6 +1165,41 @@ export class SymbioticStaking extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toAddress());
+  }
+
+  getImageId(PCR0: Bytes, PCR1: Bytes, PCR2: Bytes): Bytes {
+    let result = super.call(
+      "getImageId",
+      "getImageId(bytes,bytes,bytes):(bytes32)",
+      [
+        ethereum.Value.fromBytes(PCR0),
+        ethereum.Value.fromBytes(PCR1),
+        ethereum.Value.fromBytes(PCR2),
+      ],
+    );
+
+    return result[0].toBytes();
+  }
+
+  try_getImageId(
+    PCR0: Bytes,
+    PCR1: Bytes,
+    PCR2: Bytes,
+  ): ethereum.CallResult<Bytes> {
+    let result = super.tryCall(
+      "getImageId",
+      "getImageId(bytes,bytes,bytes):(bytes32)",
+      [
+        ethereum.Value.fromBytes(PCR0),
+        ethereum.Value.fromBytes(PCR1),
+        ethereum.Value.fromBytes(PCR2),
+      ],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBytes());
   }
 
   getOperatorActiveStakeAmount(
@@ -982,6 +1258,45 @@ export class SymbioticStaking extends ethereum.SmartContract {
       "getOperatorStakeAmount",
       "getOperatorStakeAmount(address,address):(uint256)",
       [
+        ethereum.Value.fromAddress(_stakeToken),
+        ethereum.Value.fromAddress(_operator),
+      ],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toBigInt());
+  }
+
+  getOperatorStakeAmountAt(
+    _captureTimestamp: BigInt,
+    _stakeToken: Address,
+    _operator: Address,
+  ): BigInt {
+    let result = super.call(
+      "getOperatorStakeAmountAt",
+      "getOperatorStakeAmountAt(uint256,address,address):(uint256)",
+      [
+        ethereum.Value.fromUnsignedBigInt(_captureTimestamp),
+        ethereum.Value.fromAddress(_stakeToken),
+        ethereum.Value.fromAddress(_operator),
+      ],
+    );
+
+    return result[0].toBigInt();
+  }
+
+  try_getOperatorStakeAmountAt(
+    _captureTimestamp: BigInt,
+    _stakeToken: Address,
+    _operator: Address,
+  ): ethereum.CallResult<BigInt> {
+    let result = super.tryCall(
+      "getOperatorStakeAmountAt",
+      "getOperatorStakeAmountAt(uint256,address,address):(uint256)",
+      [
+        ethereum.Value.fromUnsignedBigInt(_captureTimestamp),
         ethereum.Value.fromAddress(_stakeToken),
         ethereum.Value.fromAddress(_operator),
       ],
@@ -1602,6 +1917,104 @@ export class SymbioticStaking extends ethereum.SmartContract {
   }
 }
 
+export class ConstructorCall extends ethereum.Call {
+  get inputs(): ConstructorCall__Inputs {
+    return new ConstructorCall__Inputs(this);
+  }
+
+  get outputs(): ConstructorCall__Outputs {
+    return new ConstructorCall__Outputs(this);
+  }
+}
+
+export class ConstructorCall__Inputs {
+  _call: ConstructorCall;
+
+  constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+
+  get _generator_callback(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class ConstructorCall__Outputs {
+  _call: ConstructorCall;
+
+  constructor(call: ConstructorCall) {
+    this._call = call;
+  }
+}
+
+export class AddEnclaveImageCall extends ethereum.Call {
+  get inputs(): AddEnclaveImageCall__Inputs {
+    return new AddEnclaveImageCall__Inputs(this);
+  }
+
+  get outputs(): AddEnclaveImageCall__Outputs {
+    return new AddEnclaveImageCall__Outputs(this);
+  }
+}
+
+export class AddEnclaveImageCall__Inputs {
+  _call: AddEnclaveImageCall;
+
+  constructor(call: AddEnclaveImageCall) {
+    this._call = call;
+  }
+
+  get PCRs(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+}
+
+export class AddEnclaveImageCall__Outputs {
+  _call: AddEnclaveImageCall;
+
+  constructor(call: AddEnclaveImageCall) {
+    this._call = call;
+  }
+}
+
+export class AddEnclaveImage1Call extends ethereum.Call {
+  get inputs(): AddEnclaveImage1Call__Inputs {
+    return new AddEnclaveImage1Call__Inputs(this);
+  }
+
+  get outputs(): AddEnclaveImage1Call__Outputs {
+    return new AddEnclaveImage1Call__Outputs(this);
+  }
+}
+
+export class AddEnclaveImage1Call__Inputs {
+  _call: AddEnclaveImage1Call;
+
+  constructor(call: AddEnclaveImage1Call) {
+    this._call = call;
+  }
+
+  get PCR0(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+
+  get PCR1(): Bytes {
+    return this._call.inputValues[1].value.toBytes();
+  }
+
+  get PCR2(): Bytes {
+    return this._call.inputValues[2].value.toBytes();
+  }
+}
+
+export class AddEnclaveImage1Call__Outputs {
+  _call: AddEnclaveImage1Call;
+
+  constructor(call: AddEnclaveImage1Call) {
+    this._call = call;
+  }
+}
+
 export class AddStakeTokenCall extends ethereum.Call {
   get inputs(): AddStakeTokenCall__Inputs {
     return new AddStakeTokenCall__Inputs(this);
@@ -1725,20 +2138,24 @@ export class InitializeCall__Inputs {
     return this._call.inputValues[0].value.toAddress();
   }
 
-  get _proofMarketplace(): Address {
+  get _attestationVerifier(): Address {
     return this._call.inputValues[1].value.toAddress();
   }
 
-  get _stakingManager(): Address {
+  get _proofMarketplace(): Address {
     return this._call.inputValues[2].value.toAddress();
   }
 
-  get _rewardDistributor(): Address {
+  get _stakingManager(): Address {
     return this._call.inputValues[3].value.toAddress();
   }
 
-  get _feeRewardToken(): Address {
+  get _rewardDistributor(): Address {
     return this._call.inputValues[4].value.toAddress();
+  }
+
+  get _feeRewardToken(): Address {
+    return this._call.inputValues[5].value.toAddress();
   }
 }
 
@@ -1818,6 +2235,36 @@ export class OnJobCompletionCall__Outputs {
   _call: OnJobCompletionCall;
 
   constructor(call: OnJobCompletionCall) {
+    this._call = call;
+  }
+}
+
+export class RemoveEnclaveImageCall extends ethereum.Call {
+  get inputs(): RemoveEnclaveImageCall__Inputs {
+    return new RemoveEnclaveImageCall__Inputs(this);
+  }
+
+  get outputs(): RemoveEnclaveImageCall__Outputs {
+    return new RemoveEnclaveImageCall__Outputs(this);
+  }
+}
+
+export class RemoveEnclaveImageCall__Inputs {
+  _call: RemoveEnclaveImageCall;
+
+  constructor(call: RemoveEnclaveImageCall) {
+    this._call = call;
+  }
+
+  get _imageId(): Bytes {
+    return this._call.inputValues[0].value.toBytes();
+  }
+}
+
+export class RemoveEnclaveImageCall__Outputs {
+  _call: RemoveEnclaveImageCall;
+
+  constructor(call: RemoveEnclaveImageCall) {
     this._call = call;
   }
 }
@@ -1950,6 +2397,36 @@ export class SetAmountToLockCall__Outputs {
   _call: SetAmountToLockCall;
 
   constructor(call: SetAmountToLockCall) {
+    this._call = call;
+  }
+}
+
+export class SetAttestationVerifierCall extends ethereum.Call {
+  get inputs(): SetAttestationVerifierCall__Inputs {
+    return new SetAttestationVerifierCall__Inputs(this);
+  }
+
+  get outputs(): SetAttestationVerifierCall__Outputs {
+    return new SetAttestationVerifierCall__Outputs(this);
+  }
+}
+
+export class SetAttestationVerifierCall__Inputs {
+  _call: SetAttestationVerifierCall;
+
+  constructor(call: SetAttestationVerifierCall) {
+    this._call = call;
+  }
+
+  get _attestationVerifier(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+}
+
+export class SetAttestationVerifierCall__Outputs {
+  _call: SetAttestationVerifierCall;
+
+  constructor(call: SetAttestationVerifierCall) {
     this._call = call;
   }
 }
@@ -2241,12 +2718,16 @@ export class SubmitSlashResultCall__Inputs {
     return this._call.inputValues[2].value.toBigInt();
   }
 
-  get _slashResultData(): Bytes {
+  get _imageId(): Bytes {
     return this._call.inputValues[3].value.toBytes();
   }
 
-  get _signature(): Bytes {
+  get _slashResultData(): Bytes {
     return this._call.inputValues[4].value.toBytes();
+  }
+
+  get _proof(): Bytes {
+    return this._call.inputValues[5].value.toBytes();
   }
 }
 
@@ -2287,12 +2768,16 @@ export class SubmitVaultSnapshotCall__Inputs {
     return this._call.inputValues[2].value.toBigInt();
   }
 
-  get _vaultSnapshotData(): Bytes {
+  get _imageId(): Bytes {
     return this._call.inputValues[3].value.toBytes();
   }
 
-  get _signature(): Bytes {
+  get _vaultSnapshotData(): Bytes {
     return this._call.inputValues[4].value.toBytes();
+  }
+
+  get _proof(): Bytes {
+    return this._call.inputValues[5].value.toBytes();
   }
 }
 

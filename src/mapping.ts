@@ -90,31 +90,20 @@ export function handleSnapshotConfirmed(event: SnapshotConfirmed): void {
 
 export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): void {
     distributePoints(event.block.timestamp);
-    // Note: Assuming that snapshot is always submitted by EOA
-    const data = event.transaction.input;
-    const inputData = getEncodedInput(data);
-    const decodedRaw = ethereum.decode("(uint256,uint256,uint256,bytes32,bytes,bytes)", inputData);
-    if(decodedRaw == null) {
-        log.error('Failed to decode snapshot data', []);
-        return;
-    }
-    const decoded = decodedRaw.toTuple();
-    if(decoded.length != 6) {
-        log.warning('Decoded snapshot data has incorrect number of fields', [decoded.length.toString()]);
-    }
-    const snapshotTs = decoded[2].toBigInt();
-    const snapshotEntity = Snapshot.load(snapshotTs.toString());
-    if(snapshotEntity != null) {
+    const snapshotData = event.params.vaultSnapshotData;
+    const snapshotTs = event.params.captureTimestamp;
+    let snapshotEntity = Snapshot.load(snapshotTs.toString());
+    if(snapshotEntity == null) {
+        snapshotEntity = new Snapshot(snapshotTs.toString());
         snapshotEntity.index = GLOBAL_STATE_ID;
         snapshotEntity.transmitter = event.params.transmitter.toHexString();
         snapshotEntity.snapshotTs = snapshotTs;
         snapshotEntity.save();
     }
 
-    const snapshotData = decoded[4].toBytes();
     const snapshotDataDecodedRaw = ethereum.decode("((address,address,address,uint256)[])", snapshotData);
     if(snapshotDataDecodedRaw == null) {
-        log.error('Failed to decode snapshot data', []);
+        log.error('Failed to decode stake data in snapshot', [snapshotData.toHexString()]);
         return;
     }
     const snapshotDataDecodedArray = snapshotDataDecodedRaw.toArray();

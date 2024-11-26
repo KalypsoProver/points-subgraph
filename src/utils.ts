@@ -70,8 +70,11 @@ function distributePointsForEpoch(epoch: BigInt): void {
     let generatorList = globalState.generators;
 
     // 3. Get the number of tasks per generator for the epoch
-    let generatorJobs = new TypedMap<string, BigInt>();
-    let generatorJobsPerToken = new TypedMap<string, TypedMap<string, BigInt>>();
+    if(globalState.confirmedSnapshots.length == 0) {
+        log.warning('No snapshot found for distributing rewards', []);
+        return;
+    }
+    const latestSnapshot = globalState.confirmedSnapshots.pop() || '0';
 
     let epochState = EpochState.load(epoch.toString());
     if(epochState == null) {
@@ -119,9 +122,9 @@ function distributePointsForEpoch(epoch: BigInt): void {
             const count = generatorJobsPerToken.entries[j].value;
             const rewardForToken = reward.times(count).div(totalGeneratorJobsInEpoch);
 
-            let totalDelegationForToken = TotalDelegation.load(generator + '-' + token + '-' + epoch.toString());
+            let totalDelegationForToken = TotalDelegation.load(generator + '-' + token + '-' + latestSnapshot.toString());
             if(totalDelegationForToken == null) {
-                log.warning('Total delegation not found for generator using token in the epoch', [generator, token, epoch.toString()]);
+                log.warning('Total delegation not found for generator using token in the snapshot', [generator, token, latestSnapshot.toString()]);
                 continue;
             }
 

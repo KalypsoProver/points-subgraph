@@ -32,6 +32,32 @@ export class AddIvsKey__Params {
   }
 }
 
+export class AddedStake extends ethereum.Event {
+  get params(): AddedStake__Params {
+    return new AddedStake__Params(this);
+  }
+}
+
+export class AddedStake__Params {
+  _event: AddedStake;
+
+  constructor(event: AddedStake) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class ChangedGeneratorRewardAddress extends ethereum.Event {
   get params(): ChangedGeneratorRewardAddress__Params {
     return new ChangedGeneratorRewardAddress__Params(this);
@@ -71,7 +97,7 @@ export class ComputeLockImposed__Params {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get stake(): BigInt {
+  get compute(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 }
@@ -93,7 +119,7 @@ export class ComputeLockReleased__Params {
     return this._event.parameters[0].value.toAddress();
   }
 
-  get stake(): BigInt {
+  get compute(): BigInt {
     return this._event.parameters[1].value.toBigInt();
   }
 }
@@ -178,6 +204,32 @@ export class Initialized__Params {
   }
 }
 
+export class IntendToReduceStake extends ethereum.Event {
+  get params(): IntendToReduceStake__Params {
+    return new IntendToReduceStake__Params(this);
+  }
+}
+
+export class IntendToReduceStake__Params {
+  _event: IntendToReduceStake;
+
+  constructor(event: IntendToReduceStake) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class JoinedMarketplace extends ethereum.Event {
   get params(): JoinedMarketplace__Params {
     return new JoinedMarketplace__Params(this);
@@ -248,6 +300,32 @@ export class RegisteredGenerator__Params {
   }
 }
 
+export class RemovedStake extends ethereum.Event {
+  get params(): RemovedStake__Params {
+    return new RemovedStake__Params(this);
+  }
+}
+
+export class RemovedStake__Params {
+  _event: RemovedStake;
+
+  constructor(event: RemovedStake) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
 export class RequestComputeDecrease extends ethereum.Event {
   get params(): RequestComputeDecrease__Params {
     return new RequestComputeDecrease__Params(this);
@@ -289,6 +367,32 @@ export class RequestExitMarketplace__Params {
 
   get marketId(): BigInt {
     return this._event.parameters[1].value.toBigInt();
+  }
+}
+
+export class RequestStakeDecrease extends ethereum.Event {
+  get params(): RequestStakeDecrease__Params {
+    return new RequestStakeDecrease__Params(this);
+  }
+}
+
+export class RequestStakeDecrease__Params {
+  _event: RequestStakeDecrease;
+
+  constructor(event: RequestStakeDecrease) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
   }
 }
 
@@ -367,6 +471,102 @@ export class RoleRevoked__Params {
 
   get sender(): Address {
     return this._event.parameters[2].value.toAddress();
+  }
+}
+
+export class StakeLockImposed extends ethereum.Event {
+  get params(): StakeLockImposed__Params {
+    return new StakeLockImposed__Params(this);
+  }
+}
+
+export class StakeLockImposed__Params {
+  _event: StakeLockImposed;
+
+  constructor(event: StakeLockImposed) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get stake(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class StakeLockReleased extends ethereum.Event {
+  get params(): StakeLockReleased__Params {
+    return new StakeLockReleased__Params(this);
+  }
+}
+
+export class StakeLockReleased__Params {
+  _event: StakeLockReleased;
+
+  constructor(event: StakeLockReleased) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get stake(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class StakeSlashed extends ethereum.Event {
+  get params(): StakeSlashed__Params {
+    return new StakeSlashed__Params(this);
+  }
+}
+
+export class StakeSlashed__Params {
+  _event: StakeSlashed;
+
+  constructor(event: StakeSlashed) {
+    this._event = event;
+  }
+
+  get generatorAddress(): Address {
+    return this._event.parameters[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._event.parameters[1].value.toAddress();
+  }
+
+  get stake(): BigInt {
+    return this._event.parameters[2].value.toBigInt();
+  }
+}
+
+export class SymbioticCompleteSnapshot extends ethereum.Event {
+  get params(): SymbioticCompleteSnapshot__Params {
+    return new SymbioticCompleteSnapshot__Params(this);
+  }
+}
+
+export class SymbioticCompleteSnapshot__Params {
+  _event: SymbioticCompleteSnapshot;
+
+  constructor(event: SymbioticCompleteSnapshot) {
+    this._event = event;
+  }
+
+  get captureTimestamp(): BigInt {
+    return this._event.parameters[0].value.toBigInt();
   }
 }
 
@@ -684,6 +884,29 @@ export class GeneratorRegistry extends ethereum.SmartContract {
     }
     let value = result.value;
     return ethereum.CallResult.fromValue(value[0].toBytes());
+  }
+
+  STAKING_MANAGER(): Address {
+    let result = super.call(
+      "STAKING_MANAGER",
+      "STAKING_MANAGER():(address)",
+      [],
+    );
+
+    return result[0].toAddress();
+  }
+
+  try_STAKING_MANAGER(): ethereum.CallResult<Address> {
+    let result = super.tryCall(
+      "STAKING_MANAGER",
+      "STAKING_MANAGER():(address)",
+      [],
+    );
+    if (result.reverted) {
+      return new ethereum.CallResult();
+    }
+    let value = result.value;
+    return ethereum.CallResult.fromValue(value[0].toAddress());
   }
 
   UNLOCK_WAIT_BLOCKS(): BigInt {
@@ -1102,6 +1325,10 @@ export class ConstructorCall__Inputs {
   get _entityRegistry(): Address {
     return this._call.inputValues[0].value.toAddress();
   }
+
+  get _stakingManager(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
 }
 
 export class ConstructorCall__Outputs {
@@ -1146,6 +1373,44 @@ export class AddIvsKeyCall__Outputs {
   _call: AddIvsKeyCall;
 
   constructor(call: AddIvsKeyCall) {
+    this._call = call;
+  }
+}
+
+export class AddStakeCallbackCall extends ethereum.Call {
+  get inputs(): AddStakeCallbackCall__Inputs {
+    return new AddStakeCallbackCall__Inputs(this);
+  }
+
+  get outputs(): AddStakeCallbackCall__Outputs {
+    return new AddStakeCallbackCall__Outputs(this);
+  }
+}
+
+export class AddStakeCallbackCall__Inputs {
+  _call: AddStakeCallbackCall;
+
+  constructor(call: AddStakeCallbackCall) {
+    this._call = call;
+  }
+
+  get generatorAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class AddStakeCallbackCall__Outputs {
+  _call: AddStakeCallbackCall;
+
+  constructor(call: AddStakeCallbackCall) {
     this._call = call;
   }
 }
@@ -1444,6 +1709,44 @@ export class IntendToReduceComputeCall__Outputs {
   }
 }
 
+export class IntendToReduceStakeCallbackCall extends ethereum.Call {
+  get inputs(): IntendToReduceStakeCallbackCall__Inputs {
+    return new IntendToReduceStakeCallbackCall__Inputs(this);
+  }
+
+  get outputs(): IntendToReduceStakeCallbackCall__Outputs {
+    return new IntendToReduceStakeCallbackCall__Outputs(this);
+  }
+}
+
+export class IntendToReduceStakeCallbackCall__Inputs {
+  _call: IntendToReduceStakeCallbackCall;
+
+  constructor(call: IntendToReduceStakeCallbackCall) {
+    this._call = call;
+  }
+
+  get generatorAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class IntendToReduceStakeCallbackCall__Outputs {
+  _call: IntendToReduceStakeCallbackCall;
+
+  constructor(call: IntendToReduceStakeCallbackCall) {
+    this._call = call;
+  }
+}
+
 export class JoinMarketplaceCall extends ethereum.Call {
   get inputs(): JoinMarketplaceCall__Inputs {
     return new JoinMarketplaceCall__Inputs(this);
@@ -1660,6 +1963,44 @@ export class RemoveEncryptionKeyCall__Outputs {
   }
 }
 
+export class RemoveStakeCallbackCall extends ethereum.Call {
+  get inputs(): RemoveStakeCallbackCall__Inputs {
+    return new RemoveStakeCallbackCall__Inputs(this);
+  }
+
+  get outputs(): RemoveStakeCallbackCall__Outputs {
+    return new RemoveStakeCallbackCall__Outputs(this);
+  }
+}
+
+export class RemoveStakeCallbackCall__Inputs {
+  _call: RemoveStakeCallbackCall;
+
+  constructor(call: RemoveStakeCallbackCall) {
+    this._call = call;
+  }
+
+  get generatorAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class RemoveStakeCallbackCall__Outputs {
+  _call: RemoveStakeCallbackCall;
+
+  constructor(call: RemoveStakeCallbackCall) {
+    this._call = call;
+  }
+}
+
 export class RenounceRoleCall extends ethereum.Call {
   get inputs(): RenounceRoleCall__Inputs {
     return new RenounceRoleCall__Inputs(this);
@@ -1784,6 +2125,150 @@ export class RevokeRoleCall__Outputs {
   _call: RevokeRoleCall;
 
   constructor(call: RevokeRoleCall) {
+    this._call = call;
+  }
+}
+
+export class StakeLockImposedCallbackCall extends ethereum.Call {
+  get inputs(): StakeLockImposedCallbackCall__Inputs {
+    return new StakeLockImposedCallbackCall__Inputs(this);
+  }
+
+  get outputs(): StakeLockImposedCallbackCall__Outputs {
+    return new StakeLockImposedCallbackCall__Outputs(this);
+  }
+}
+
+export class StakeLockImposedCallbackCall__Inputs {
+  _call: StakeLockImposedCallbackCall;
+
+  constructor(call: StakeLockImposedCallbackCall) {
+    this._call = call;
+  }
+
+  get generatorAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class StakeLockImposedCallbackCall__Outputs {
+  _call: StakeLockImposedCallbackCall;
+
+  constructor(call: StakeLockImposedCallbackCall) {
+    this._call = call;
+  }
+}
+
+export class StakeLockReleasedCallbackCall extends ethereum.Call {
+  get inputs(): StakeLockReleasedCallbackCall__Inputs {
+    return new StakeLockReleasedCallbackCall__Inputs(this);
+  }
+
+  get outputs(): StakeLockReleasedCallbackCall__Outputs {
+    return new StakeLockReleasedCallbackCall__Outputs(this);
+  }
+}
+
+export class StakeLockReleasedCallbackCall__Inputs {
+  _call: StakeLockReleasedCallbackCall;
+
+  constructor(call: StakeLockReleasedCallbackCall) {
+    this._call = call;
+  }
+
+  get generatorAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class StakeLockReleasedCallbackCall__Outputs {
+  _call: StakeLockReleasedCallbackCall;
+
+  constructor(call: StakeLockReleasedCallbackCall) {
+    this._call = call;
+  }
+}
+
+export class StakeSlashedCallbackCall extends ethereum.Call {
+  get inputs(): StakeSlashedCallbackCall__Inputs {
+    return new StakeSlashedCallbackCall__Inputs(this);
+  }
+
+  get outputs(): StakeSlashedCallbackCall__Outputs {
+    return new StakeSlashedCallbackCall__Outputs(this);
+  }
+}
+
+export class StakeSlashedCallbackCall__Inputs {
+  _call: StakeSlashedCallbackCall;
+
+  constructor(call: StakeSlashedCallbackCall) {
+    this._call = call;
+  }
+
+  get generatorAddress(): Address {
+    return this._call.inputValues[0].value.toAddress();
+  }
+
+  get token(): Address {
+    return this._call.inputValues[1].value.toAddress();
+  }
+
+  get amount(): BigInt {
+    return this._call.inputValues[2].value.toBigInt();
+  }
+}
+
+export class StakeSlashedCallbackCall__Outputs {
+  _call: StakeSlashedCallbackCall;
+
+  constructor(call: StakeSlashedCallbackCall) {
+    this._call = call;
+  }
+}
+
+export class SymbioticCompleteSnapshotCallbackCall extends ethereum.Call {
+  get inputs(): SymbioticCompleteSnapshotCallbackCall__Inputs {
+    return new SymbioticCompleteSnapshotCallbackCall__Inputs(this);
+  }
+
+  get outputs(): SymbioticCompleteSnapshotCallbackCall__Outputs {
+    return new SymbioticCompleteSnapshotCallbackCall__Outputs(this);
+  }
+}
+
+export class SymbioticCompleteSnapshotCallbackCall__Inputs {
+  _call: SymbioticCompleteSnapshotCallbackCall;
+
+  constructor(call: SymbioticCompleteSnapshotCallbackCall) {
+    this._call = call;
+  }
+
+  get captureTimestamp(): BigInt {
+    return this._call.inputValues[0].value.toBigInt();
+  }
+}
+
+export class SymbioticCompleteSnapshotCallbackCall__Outputs {
+  _call: SymbioticCompleteSnapshotCallbackCall;
+
+  constructor(call: SymbioticCompleteSnapshotCallbackCall) {
     this._call = call;
   }
 }
