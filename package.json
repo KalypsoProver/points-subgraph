@@ -2,11 +2,16 @@
   "name": "kalypso-points-subgraph",
   "private": true,
   "scripts": {
+    "auth": "graph auth --product subgraph-studio ",
     "build": "graph build",
-    "codegen": "graph codegen"
+    "codegen": "graph codegen",
+    "deploy": "graph deploy kalypso-points"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.87.0",
     "@graphprotocol/graph-ts": "0.35.1"
+  },
+  "dependencies": {
+    "source-map-support": "^0.5.21"
   }
 }

@@ -6,32 +6,22 @@ type GlobalState @entity {
   pointsDistributedTillEpoch: BigInt!
   jobsByEpoch: [TotalJobsPerEpoch!]! @derivedFrom(field: "index")
   generators: [User!]!
-  Users: [User!]!
+  confirmedSnapshots: [Snapshot!]!
 }
 
-type Task @entity {
-  id: ID!
-  epoch: BigInt!
-  generator: Generator!
-  assignedAt: BigInt!
-  completedAt: BigInt
-}
-
-type TotalJobsPerEpoch @entity {
+type Snapshot @entity {
   id: ID!
   index: GlobalState!
-  epoch: BigInt!
-  jobCount: BigInt!
+  confirmedAt: BigInt
+  transmitter: String!
+  snapshotTs: BigInt!
+  delegations: [Delegation!]! @derivedFrom(field: "snapshot")
+  totalDelegations: [TotalDelegation!]! @derivedFrom(field: "snapshot")
 }
 
-type Generator @entity {
+type EpochState @entity {
   id: ID!
-  address: String!
-  commission: BigInt!
-  tasks: [Task!]! @derivedFrom(field: "generator")
-  delegations: [Delegation!]! @derivedFrom(field: "generator")
-  jobsByEpoch: [JobsPerEpoch!]! @derivedFrom(field: "address")
-  totalDelegation: [TotalDelegation!]! @derivedFrom(field: "generator")
+  tokenList: [String!]!
 }
 
 type Delegation @entity {
@@ -40,7 +30,7 @@ type Delegation @entity {
   delegator: User!
   token: String!
   amount: BigInt!
-  lastUpdatedEpoch: BigInt!
+  snapshot: Snapshot!
 }
 
 type TotalDelegation @entity {
@@ -48,13 +38,43 @@ type TotalDelegation @entity {
   generator: Generator!
   token: String!
   amount: BigInt!
+  snapshot: Snapshot!
+}
+
+type Generator @entity {
+  id: ID!
+  address: String!
+  commission: BigInt!
+  tasks: [Task!]! @derivedFrom(field: "generator")
+  jobsByEpoch: [JobsPerEpoch!]! @derivedFrom(field: "address")
+  delegations: [Delegation!]!
+  totalDelegation: [TotalDelegation!]!
+}
+
+type Task @entity {
+  id: ID!
+  epoch: BigInt!
+  generator: Generator!
+  token: String!
+  assignedAt: BigInt!
+  completedAt: BigInt
 }
 
 type JobsPerEpoch @entity {
   id: ID!
   address: Generator!
+  token: String!
   epoch: BigInt!
   jobCount: BigInt!
+  jobs: [Task!]!
+}
+
+type TotalJobsPerEpoch @entity {
+  id: ID!
+  index: GlobalState!
+  epoch: BigInt!
+  jobCount: BigInt!
+  jobs: [Task!]!
 }
 
 type User @entity {

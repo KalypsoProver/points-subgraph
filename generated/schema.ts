@@ -125,8 +125,8 @@ export class GlobalState extends Entity {
     this.set("generators", Value.fromStringArray(value));
   }
 
-  get Users(): Array<string> {
-    let value = this.get("Users");
+  get confirmedSnapshots(): Array<string> {
+    let value = this.get("confirmedSnapshots");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
@@ -134,12 +134,12 @@ export class GlobalState extends Entity {
     }
   }
 
-  set Users(value: Array<string>) {
-    this.set("Users", Value.fromStringArray(value));
+  set confirmedSnapshots(value: Array<string>) {
+    this.set("confirmedSnapshots", Value.fromStringArray(value));
   }
 }
 
-export class Task extends Entity {
+export class Snapshot extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -147,122 +147,22 @@ export class Task extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save Task entity without an ID");
+    assert(id != null, "Cannot save Snapshot entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        `Entities of type Task must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+        `Entities of type Snapshot must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
       );
-      store.set("Task", id.toString(), this);
+      store.set("Snapshot", id.toString(), this);
     }
   }
 
-  static loadInBlock(id: string): Task | null {
-    return changetype<Task | null>(store.get_in_block("Task", id));
+  static loadInBlock(id: string): Snapshot | null {
+    return changetype<Snapshot | null>(store.get_in_block("Snapshot", id));
   }
 
-  static load(id: string): Task | null {
-    return changetype<Task | null>(store.get("Task", id));
-  }
-
-  get id(): string {
-    let value = this.get("id");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toString();
-    }
-  }
-
-  set id(value: string) {
-    this.set("id", Value.fromString(value));
-  }
-
-  get epoch(): BigInt {
-    let value = this.get("epoch");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set epoch(value: BigInt) {
-    this.set("epoch", Value.fromBigInt(value));
-  }
-
-  get generator(): string {
-    let value = this.get("generator");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toString();
-    }
-  }
-
-  set generator(value: string) {
-    this.set("generator", Value.fromString(value));
-  }
-
-  get assignedAt(): BigInt {
-    let value = this.get("assignedAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set assignedAt(value: BigInt) {
-    this.set("assignedAt", Value.fromBigInt(value));
-  }
-
-  get completedAt(): BigInt | null {
-    let value = this.get("completedAt");
-    if (!value || value.kind == ValueKind.NULL) {
-      return null;
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set completedAt(value: BigInt | null) {
-    if (!value) {
-      this.unset("completedAt");
-    } else {
-      this.set("completedAt", Value.fromBigInt(<BigInt>value));
-    }
-  }
-}
-
-export class TotalJobsPerEpoch extends Entity {
-  constructor(id: string) {
-    super();
-    this.set("id", Value.fromString(id));
-  }
-
-  save(): void {
-    let id = this.get("id");
-    assert(id != null, "Cannot save TotalJobsPerEpoch entity without an ID");
-    if (id) {
-      assert(
-        id.kind == ValueKind.STRING,
-        `Entities of type TotalJobsPerEpoch must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
-      );
-      store.set("TotalJobsPerEpoch", id.toString(), this);
-    }
-  }
-
-  static loadInBlock(id: string): TotalJobsPerEpoch | null {
-    return changetype<TotalJobsPerEpoch | null>(
-      store.get_in_block("TotalJobsPerEpoch", id),
-    );
-  }
-
-  static load(id: string): TotalJobsPerEpoch | null {
-    return changetype<TotalJobsPerEpoch | null>(
-      store.get("TotalJobsPerEpoch", id),
-    );
+  static load(id: string): Snapshot | null {
+    return changetype<Snapshot | null>(store.get("Snapshot", id));
   }
 
   get id(): string {
@@ -291,8 +191,38 @@ export class TotalJobsPerEpoch extends Entity {
     this.set("index", Value.fromString(value));
   }
 
-  get epoch(): BigInt {
-    let value = this.get("epoch");
+  get confirmedAt(): BigInt | null {
+    let value = this.get("confirmedAt");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set confirmedAt(value: BigInt | null) {
+    if (!value) {
+      this.unset("confirmedAt");
+    } else {
+      this.set("confirmedAt", Value.fromBigInt(<BigInt>value));
+    }
+  }
+
+  get transmitter(): string {
+    let value = this.get("transmitter");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set transmitter(value: string) {
+    this.set("transmitter", Value.fromString(value));
+  }
+
+  get snapshotTs(): BigInt {
+    let value = this.get("snapshotTs");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
@@ -300,25 +230,28 @@ export class TotalJobsPerEpoch extends Entity {
     }
   }
 
-  set epoch(value: BigInt) {
-    this.set("epoch", Value.fromBigInt(value));
+  set snapshotTs(value: BigInt) {
+    this.set("snapshotTs", Value.fromBigInt(value));
   }
 
-  get jobCount(): BigInt {
-    let value = this.get("jobCount");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
+  get delegations(): DelegationLoader {
+    return new DelegationLoader(
+      "Snapshot",
+      this.get("id")!.toString(),
+      "delegations",
+    );
   }
 
-  set jobCount(value: BigInt) {
-    this.set("jobCount", Value.fromBigInt(value));
+  get totalDelegations(): TotalDelegationLoader {
+    return new TotalDelegationLoader(
+      "Snapshot",
+      this.get("id")!.toString(),
+      "totalDelegations",
+    );
   }
 }
 
-export class Generator extends Entity {
+export class EpochState extends Entity {
   constructor(id: string) {
     super();
     this.set("id", Value.fromString(id));
@@ -326,22 +259,22 @@ export class Generator extends Entity {
 
   save(): void {
     let id = this.get("id");
-    assert(id != null, "Cannot save Generator entity without an ID");
+    assert(id != null, "Cannot save EpochState entity without an ID");
     if (id) {
       assert(
         id.kind == ValueKind.STRING,
-        `Entities of type Generator must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+        `Entities of type EpochState must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
       );
-      store.set("Generator", id.toString(), this);
+      store.set("EpochState", id.toString(), this);
     }
   }
 
-  static loadInBlock(id: string): Generator | null {
-    return changetype<Generator | null>(store.get_in_block("Generator", id));
+  static loadInBlock(id: string): EpochState | null {
+    return changetype<EpochState | null>(store.get_in_block("EpochState", id));
   }
 
-  static load(id: string): Generator | null {
-    return changetype<Generator | null>(store.get("Generator", id));
+  static load(id: string): EpochState | null {
+    return changetype<EpochState | null>(store.get("EpochState", id));
   }
 
   get id(): string {
@@ -357,58 +290,17 @@ export class Generator extends Entity {
     this.set("id", Value.fromString(value));
   }
 
-  get address(): string {
-    let value = this.get("address");
+  get tokenList(): Array<string> {
+    let value = this.get("tokenList");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return value.toString();
+      return value.toStringArray();
     }
   }
 
-  set address(value: string) {
-    this.set("address", Value.fromString(value));
-  }
-
-  get commission(): BigInt {
-    let value = this.get("commission");
-    if (!value || value.kind == ValueKind.NULL) {
-      throw new Error("Cannot return null for a required field.");
-    } else {
-      return value.toBigInt();
-    }
-  }
-
-  set commission(value: BigInt) {
-    this.set("commission", Value.fromBigInt(value));
-  }
-
-  get tasks(): TaskLoader {
-    return new TaskLoader("Generator", this.get("id")!.toString(), "tasks");
-  }
-
-  get delegations(): DelegationLoader {
-    return new DelegationLoader(
-      "Generator",
-      this.get("id")!.toString(),
-      "delegations",
-    );
-  }
-
-  get jobsByEpoch(): JobsPerEpochLoader {
-    return new JobsPerEpochLoader(
-      "Generator",
-      this.get("id")!.toString(),
-      "jobsByEpoch",
-    );
-  }
-
-  get totalDelegation(): TotalDelegationLoader {
-    return new TotalDelegationLoader(
-      "Generator",
-      this.get("id")!.toString(),
-      "totalDelegation",
-    );
+  set tokenList(value: Array<string>) {
+    this.set("tokenList", Value.fromStringArray(value));
   }
 }
 
@@ -503,17 +395,17 @@ export class Delegation extends Entity {
     this.set("amount", Value.fromBigInt(value));
   }
 
-  get lastUpdatedEpoch(): BigInt {
-    let value = this.get("lastUpdatedEpoch");
+  get snapshot(): string {
+    let value = this.get("snapshot");
     if (!value || value.kind == ValueKind.NULL) {
       throw new Error("Cannot return null for a required field.");
     } else {
-      return value.toBigInt();
+      return value.toString();
     }
   }
 
-  set lastUpdatedEpoch(value: BigInt) {
-    this.set("lastUpdatedEpoch", Value.fromBigInt(value));
+  set snapshot(value: string) {
+    this.set("snapshot", Value.fromString(value));
   }
 }
 
@@ -596,6 +488,232 @@ export class TotalDelegation extends Entity {
   set amount(value: BigInt) {
     this.set("amount", Value.fromBigInt(value));
   }
+
+  get snapshot(): string {
+    let value = this.get("snapshot");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set snapshot(value: string) {
+    this.set("snapshot", Value.fromString(value));
+  }
+}
+
+export class Generator extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Generator entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type Generator must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("Generator", id.toString(), this);
+    }
+  }
+
+  static loadInBlock(id: string): Generator | null {
+    return changetype<Generator | null>(store.get_in_block("Generator", id));
+  }
+
+  static load(id: string): Generator | null {
+    return changetype<Generator | null>(store.get("Generator", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get address(): string {
+    let value = this.get("address");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set address(value: string) {
+    this.set("address", Value.fromString(value));
+  }
+
+  get commission(): BigInt {
+    let value = this.get("commission");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set commission(value: BigInt) {
+    this.set("commission", Value.fromBigInt(value));
+  }
+
+  get tasks(): TaskLoader {
+    return new TaskLoader("Generator", this.get("id")!.toString(), "tasks");
+  }
+
+  get jobsByEpoch(): JobsPerEpochLoader {
+    return new JobsPerEpochLoader(
+      "Generator",
+      this.get("id")!.toString(),
+      "jobsByEpoch",
+    );
+  }
+
+  get delegations(): Array<string> {
+    let value = this.get("delegations");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set delegations(value: Array<string>) {
+    this.set("delegations", Value.fromStringArray(value));
+  }
+
+  get totalDelegation(): Array<string> {
+    let value = this.get("totalDelegation");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set totalDelegation(value: Array<string>) {
+    this.set("totalDelegation", Value.fromStringArray(value));
+  }
+}
+
+export class Task extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save Task entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type Task must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("Task", id.toString(), this);
+    }
+  }
+
+  static loadInBlock(id: string): Task | null {
+    return changetype<Task | null>(store.get_in_block("Task", id));
+  }
+
+  static load(id: string): Task | null {
+    return changetype<Task | null>(store.get("Task", id));
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get epoch(): BigInt {
+    let value = this.get("epoch");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set epoch(value: BigInt) {
+    this.set("epoch", Value.fromBigInt(value));
+  }
+
+  get generator(): string {
+    let value = this.get("generator");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set generator(value: string) {
+    this.set("generator", Value.fromString(value));
+  }
+
+  get token(): string {
+    let value = this.get("token");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set token(value: string) {
+    this.set("token", Value.fromString(value));
+  }
+
+  get assignedAt(): BigInt {
+    let value = this.get("assignedAt");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set assignedAt(value: BigInt) {
+    this.set("assignedAt", Value.fromBigInt(value));
+  }
+
+  get completedAt(): BigInt | null {
+    let value = this.get("completedAt");
+    if (!value || value.kind == ValueKind.NULL) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set completedAt(value: BigInt | null) {
+    if (!value) {
+      this.unset("completedAt");
+    } else {
+      this.set("completedAt", Value.fromBigInt(<BigInt>value));
+    }
+  }
 }
 
 export class JobsPerEpoch extends Entity {
@@ -652,6 +770,19 @@ export class JobsPerEpoch extends Entity {
     this.set("address", Value.fromString(value));
   }
 
+  get token(): string {
+    let value = this.get("token");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set token(value: string) {
+    this.set("token", Value.fromString(value));
+  }
+
   get epoch(): BigInt {
     let value = this.get("epoch");
     if (!value || value.kind == ValueKind.NULL) {
@@ -676,6 +807,115 @@ export class JobsPerEpoch extends Entity {
 
   set jobCount(value: BigInt) {
     this.set("jobCount", Value.fromBigInt(value));
+  }
+
+  get jobs(): Array<string> {
+    let value = this.get("jobs");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set jobs(value: Array<string>) {
+    this.set("jobs", Value.fromStringArray(value));
+  }
+}
+
+export class TotalJobsPerEpoch extends Entity {
+  constructor(id: string) {
+    super();
+    this.set("id", Value.fromString(id));
+  }
+
+  save(): void {
+    let id = this.get("id");
+    assert(id != null, "Cannot save TotalJobsPerEpoch entity without an ID");
+    if (id) {
+      assert(
+        id.kind == ValueKind.STRING,
+        `Entities of type TotalJobsPerEpoch must have an ID of type String but the id '${id.displayData()}' is of type ${id.displayKind()}`,
+      );
+      store.set("TotalJobsPerEpoch", id.toString(), this);
+    }
+  }
+
+  static loadInBlock(id: string): TotalJobsPerEpoch | null {
+    return changetype<TotalJobsPerEpoch | null>(
+      store.get_in_block("TotalJobsPerEpoch", id),
+    );
+  }
+
+  static load(id: string): TotalJobsPerEpoch | null {
+    return changetype<TotalJobsPerEpoch | null>(
+      store.get("TotalJobsPerEpoch", id),
+    );
+  }
+
+  get id(): string {
+    let value = this.get("id");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set id(value: string) {
+    this.set("id", Value.fromString(value));
+  }
+
+  get index(): string {
+    let value = this.get("index");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toString();
+    }
+  }
+
+  set index(value: string) {
+    this.set("index", Value.fromString(value));
+  }
+
+  get epoch(): BigInt {
+    let value = this.get("epoch");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set epoch(value: BigInt) {
+    this.set("epoch", Value.fromBigInt(value));
+  }
+
+  get jobCount(): BigInt {
+    let value = this.get("jobCount");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set jobCount(value: BigInt) {
+    this.set("jobCount", Value.fromBigInt(value));
+  }
+
+  get jobs(): Array<string> {
+    let value = this.get("jobs");
+    if (!value || value.kind == ValueKind.NULL) {
+      throw new Error("Cannot return null for a required field.");
+    } else {
+      return value.toStringArray();
+    }
+  }
+
+  set jobs(value: Array<string>) {
+    this.set("jobs", Value.fromStringArray(value));
   }
 }
 
@@ -763,24 +1003,6 @@ export class TotalJobsPerEpochLoader extends Entity {
   }
 }
 
-export class TaskLoader extends Entity {
-  _entity: string;
-  _field: string;
-  _id: string;
-
-  constructor(entity: string, id: string, field: string) {
-    super();
-    this._entity = entity;
-    this._id = id;
-    this._field = field;
-  }
-
-  load(): Task[] {
-    let value = store.loadRelated(this._entity, this._id, this._field);
-    return changetype<Task[]>(value);
-  }
-}
-
 export class DelegationLoader extends Entity {
   _entity: string;
   _field: string;
@@ -799,24 +1021,6 @@ export class DelegationLoader extends Entity {
   }
 }
 
-export class JobsPerEpochLoader extends Entity {
-  _entity: string;
-  _field: string;
-  _id: string;
-
-  constructor(entity: string, id: string, field: string) {
-    super();
-    this._entity = entity;
-    this._id = id;
-    this._field = field;
-  }
-
-  load(): JobsPerEpoch[] {
-    let value = store.loadRelated(this._entity, this._id, this._field);
-    return changetype<JobsPerEpoch[]>(value);
-  }
-}
-
 export class TotalDelegationLoader extends Entity {
   _entity: string;
   _field: string;
@@ -832,5 +1036,41 @@ export class TotalDelegationLoader extends Entity {
   load(): TotalDelegation[] {
     let value = store.loadRelated(this._entity, this._id, this._field);
     return changetype<TotalDelegation[]>(value);
+  }
+}
+
+export class TaskLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): Task[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<Task[]>(value);
+  }
+}
+
+export class JobsPerEpochLoader extends Entity {
+  _entity: string;
+  _field: string;
+  _id: string;
+
+  constructor(entity: string, id: string, field: string) {
+    super();
+    this._entity = entity;
+    this._id = id;
+    this._field = field;
+  }
+
+  load(): JobsPerEpoch[] {
+    let value = store.loadRelated(this._entity, this._id, this._field);
+    return changetype<JobsPerEpoch[]>(value);
   }
 }
