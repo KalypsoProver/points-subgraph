@@ -1,7 +1,7 @@
-import { Address, BigInt, Bytes, log, store, TypedMap } from '@graphprotocol/graph-ts';
-import { Delegation, EpochState, Generator, GlobalState, JobsPerEpoch, Task, TotalDelegation, TotalJobsPerEpoch, User } from '../generated/schema';
+import { BigInt, log, TypedMap } from '@graphprotocol/graph-ts';
+import { Delegation, EpochState, Generator, GlobalState, JobsPerEpoch, TotalDelegation, TotalJobsPerEpoch, User } from '../generated/schema';
 
-import { GLOBAL_STATE_ID, getTokenShare } from './constants';
+import { E18, GLOBAL_STATE_ID } from './constants';
 
 export function getCurrentEpoch(ts: BigInt): BigInt {
     let globalState = GlobalState.load(GLOBAL_STATE_ID);
@@ -12,12 +12,6 @@ export function getCurrentEpoch(ts: BigInt): BigInt {
     }
 
     return ts.minus(globalState.startTime).div(globalState.epochLength);
-}
-
-export function getEncodedInput(data: Bytes): Bytes {
-    let inputDataRaw = data.toHexString().slice(10);
-    const inputDataFormatted = '0x0000000000000000000000000000000000000000000000000000000000000020' + inputDataRaw; // prepend tuple offset
-    return Bytes.fromHexString(inputDataFormatted) as Bytes;
 }
 
 export function distributePoints(ts: BigInt): void {
@@ -56,7 +50,7 @@ function distributePointsForEpoch(epoch: BigInt): void {
     // 1. Get the total number of tasks for the epoch
     let totalJobsPerEpoch = TotalJobsPerEpoch.load(epoch.toString());
     if(totalJobsPerEpoch == null) {
-        log.info('No jobs found for epoch', [epoch.toString()]);
+        log.info('No jobs found for epoch {}', [epoch.toString()]);
         return;
     }
     let totalJobs = totalJobsPerEpoch.jobCount;
@@ -78,7 +72,7 @@ function distributePointsForEpoch(epoch: BigInt): void {
 
     let epochState = EpochState.load(epoch.toString());
     if(epochState == null) {
-        log.warning('Epoch state not found when distributing rewards', [epoch.toString()]);
+        log.warning('Epoch state for {} not found when distributing rewards', [epoch.toString()]);
         return;
     }
     for(let i=0; i < generatorList.length; i++) {
@@ -89,7 +83,7 @@ function distributePointsForEpoch(epoch: BigInt): void {
             const token = epochState.tokenList[j];
             let jobsPerEpoch = JobsPerEpoch.load(epoch.toString() + '-' + generator + '-' + token);
             if(jobsPerEpoch == null) {
-                log.info('No jobs found for generator using token in the epoch', [epoch.toString(), generator, token]);
+                log.info('No jobs found for generator {} using token {} in epoch {}', [generator, token, epoch.toString()]);
                 continue;
             }
             totalGeneratorJobsInEpoch = totalGeneratorJobsInEpoch.plus(jobsPerEpoch.jobCount);
@@ -107,11 +101,11 @@ function distributePointsForEpoch(epoch: BigInt): void {
 
         let generatorEntity = Generator.load(generator);
         if(generatorEntity == null) {
-            log.warning('Generator not registered when distributing rewards', [generator]);
+            log.warning('Generator {} not registered when distributing rewards', [generator]);
             continue;
         }
 
-        const generatorShare = reward.times(generatorEntity.commission).div(BigInt.fromString('10').pow(18));
+        const generatorShare = reward.times(generatorEntity.commission).div(E18);
         generatorUserEntity.points = generatorUserEntity.points.plus(generatorShare);
         generatorUserEntity.save();
         reward = reward.minus(generatorShare);
@@ -124,11 +118,11 @@ function distributePointsForEpoch(epoch: BigInt): void {
 
             let totalDelegationForToken = TotalDelegation.load(generator + '-' + token + '-' + latestSnapshot.toString());
             if(totalDelegationForToken == null) {
-                log.warning('Total delegation not found for generator using token in the snapshot', [generator, token, latestSnapshot.toString()]);
+                log.warning('Total delegation not found for generator {} using token {} in the snapshot {}', [generator, token, latestSnapshot.toString()]);
                 continue;
             }
 
-            rewardsPerToken.set(token, rewardForToken.div(totalDelegationForToken.amount));
+            rewardsPerToken.set(token, rewardForToken.times(E18).div(totalDelegationForToken.amount));
         }
 
         const delegations = generatorEntity.delegations;
@@ -136,17 +130,17 @@ function distributePointsForEpoch(epoch: BigInt): void {
             const delegationId = delegations[j];
             let delegation = Delegation.load(delegationId);
             if(delegation == null) {
-                log.warning('Delegation not found when distributing rewards', [delegationId]);
-                return;
+                log.warning('Delegation {} not found when distributing rewards', [delegationId]);
+                continue;
             }
 
             const rewardPerToken = rewardsPerToken.get(delegation.token);
             if (!rewardPerToken) {
-                log.warning('No reward found for this token', [delegation.token]);
-                return;
+                log.warning('No reward found for token {}', [delegation.token]);
+                continue;
             }
 
-            const userShare = rewardPerToken.times(delegation.amount)
+            const userShare = rewardPerToken.times(delegation.amount).div(E18);
             let user = User.load(delegation.delegator);
             if(user == null) {
                 user = new User(delegation.delegator);
@@ -156,113 +150,5 @@ function distributePointsForEpoch(epoch: BigInt): void {
             user.points = user.points.plus(userShare);
             user.save();
         }
-
-
-
-
-
-        // let jobsPerEpochId = epoch.toString() + '-' + generator;
-        // let jobsPerEpoch = JobsPerEpoch.load(jobsPerEpochId);
-        // if(jobsPerEpoch == null) {
-        //     jobsPerEpoch = new JobsPerEpoch(jobsPerEpochId);
-        //     jobsPerEpoch.address = generator;
-        //     jobsPerEpoch.epoch = epoch;
-        //     jobsPerEpoch.jobCount = BigInt.fromI32(0);
-        //     jobsPerEpoch.jobs = [];
-        // }
-        // let jobs = jobsPerEpoch.jobs;
-        // let jobsCount = BigInt.fromI32(jobs.length);
-
-        // // 4. Calculate the rewards for each generator based on the number of tasks
-        // let reward = globalState.pointsPerEpoch.times(jobsCount).div(totalJobs);
-
-        // let userEntity = User.load(generator);
-        // if(userEntity == null) {
-        //     userEntity = new User(generator);
-        //     userEntity.address = generator;
-        //     userEntity.points = BigInt.fromI32(0);
-        // }
-
-        // let generatorEntity = Generator.load(generator);
-        // if(generatorEntity == null) {
-        //     log.warning('Generator not found when distributing rewards', [generator]);
-        //     return;
-        // }
-
-        // // 5. Distribute the rewards to the generators
-        // const generatorShare = reward.times(generatorEntity.commission).div(BigInt.fromString('1e18'));
-        // userEntity.points = userEntity.points.plus(generatorShare);
-        // userEntity.save();
-        // generatorRewards.set(generator, reward.minus(generatorShare));
-
-        // const rewardPerJob = reward.minus(generatorShare).div(jobsCount);
-
-        // // 8. Get the jobs completed by generator for each token
-        // let rewardsByToken = new TypedMap<string, BigInt>();
-        // for(let j=0; j < jobs.length; j++) {
-        //     const job = jobs[i];
-        //     let task = Task.load(job);
-        //     if(task == null) {
-        //         log.warning('Task not found when distributing rewards', [job]);
-        //         return;
-        //     }
-        //     let token = task.token;
-        //     let count = rewardsByToken.get(token);
-        //     if(!count) {
-        //         count = BigInt.fromI32(0);
-        //     }
-        //     rewardsByToken.set(
-        //         token, 
-        //         count.plus(rewardPerJob)
-        //     );
-        // }
-        // generatorRewardsPerToken.set(generator, rewardsByToken);
-
-        // const latestSnapshot = globalState.confirmedSnapshots.pop();
-        // if(latestSnapshot == null) {
-        //     log.warning('No snapshot found for distributing rewards', []);
-        //     return;
-        // }
-
-        // // 6. Get the total delegations by token for each generator
-        // const generatorDelegationsByToken = new TypedMap<string, BigInt>();
-        // const rewardPerToken = generatorRewardsPerToken.get(generator);
-        // if(!rewardPerToken) return;
-        // for(let j=0; j < rewardPerToken.entries.length; j++) {
-        //     const token = rewardPerToken.entries[j].key;
-        //     const totalDelegation = TotalDelegation.load(generator + '-' + token + '-' + latestSnapshot.toString());
-        //     if(totalDelegation == null) {
-        //         log.warning('Total delegation not found for token', [generator, token]);
-        //         continue;
-        //     }
-        //     generatorDelegationsByToken.set(token, totalDelegation.amount);
-        // }
-
-        // // 9. Calculate the rewards for each token based on the weight of rewards
-        // const delegations = generatorEntity.delegations;
-        // for(let j=0; j < delegations.length; j++) {
-        //     const delegationId = delegations[j];
-        //     let delegation = Delegation.load(delegationId);
-        //     if(delegation == null) {
-        //         log.warning('Delegation not found when distributing rewards', [delegationId]);
-        //         return;
-        //     }
-
-        //     const totalDelegations = generatorDelegationsByToken.get(delegation.token);
-        //     if (!totalDelegations) {
-        //         log.warning('Total delegations not found for token', [delegation.token]);
-        //         return;
-        //     }
-
-        //     const userShare = rewardPerJob.times(delegation.amount).div(totalDelegations);
-        //     let user = User.load(delegation.delegator);
-        //     if(user == null) {
-        //         user = new User(delegation.delegator);
-        //         user.address = delegation.delegator;
-        //         user.points = BigInt.fromI32(0);
-        //     }
-        //     user.points = user.points.plus(userShare);
-        //     user.save();
-        // }
     }
 }

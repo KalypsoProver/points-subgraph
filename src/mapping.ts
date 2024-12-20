@@ -1,11 +1,11 @@
-import { BigInt, log, ethereum, TypedMap, Address } from '@graphprotocol/graph-ts';
+import { BigInt, log, ethereum, TypedMap } from '@graphprotocol/graph-ts';
 import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch, Delegation, TotalDelegation, Snapshot, EpochState } from '../generated/schema';
 import { ProofCreated, OperatorRewardShareSet, Initialized, TaskCreated } from '../generated/ProofMarketplace/ProofMarketplace';
 import { SnapshotConfirmed, VaultSnapshotSubmitted, StakeLocked } from '../generated/SymbioticStaking/SymbioticStaking';
 import { RegisteredGenerator } from '../generated/GeneratorRegistry/GeneratorRegistry';
 
 import { EPOCH_LENGTH, GLOBAL_STATE_ID, POINTS_PER_EPOCH, START_TIME, ZERO_ADDRESS } from './constants';
-import { getCurrentEpoch, getEncodedInput, distributePoints } from './utils';
+import { getCurrentEpoch, distributePoints } from './utils';
 
 // Check if the epoch is over before running any function
 // If the epoch is over, calculate the points for each user and the generator and distribute them
@@ -17,7 +17,7 @@ export function handleSnapshotConfirmed(event: SnapshotConfirmed): void {
     // update the snapshot with the confirmed timestamp
     let snapshot = Snapshot.load(event.params.confirmedTimestamp.toString());
     if (snapshot == null) {
-        log.error('Snapshot not found when snapshot was confirmed', [event.params.confirmedTimestamp.toString()]);
+        log.error('Snapshot not found when snapshot {} was confirmed', [event.params.confirmedTimestamp.toString()]);
         return;
     }
 
@@ -31,7 +31,8 @@ export function handleSnapshotConfirmed(event: SnapshotConfirmed): void {
         return;
     }
 
-    globalState.confirmedSnapshots.push(snapshot.id);
+    let confirmedSnapshots = globalState.confirmedSnapshots;
+    globalState.confirmedSnapshots = confirmedSnapshots.concat([snapshot.id]);
     globalState.save();
 
     const delegations = snapshot.delegations.load();
@@ -41,31 +42,29 @@ export function handleSnapshotConfirmed(event: SnapshotConfirmed): void {
     const totalDelegationsByProver = new TypedMap<string, Array<string>>();
 
     for(let i=0; i < delegations.length; i++) {
-        const generatorDelegations = delegationsByProver.get(delegations[i].generator);
+        let generatorDelegations = delegationsByProver.get(delegations[i].generator);
         if(!generatorDelegations) {
-            delegationsByProver.set(delegations[i].generator, new Array<string>());
-        } else {
-            generatorDelegations.push(delegations[i].id);
-            delegationsByProver.set(delegations[i].generator, generatorDelegations);
+            generatorDelegations = new Array<string>();
         }
+        generatorDelegations.push(delegations[i].id);
+        delegationsByProver.set(delegations[i].generator, generatorDelegations);
     }
 
     for(let i=0; i < totalDelegations.length; i++) {
-        const generatorTotalDelegations = totalDelegationsByProver.get(totalDelegations[i].generator);
+        let generatorTotalDelegations = totalDelegationsByProver.get(totalDelegations[i].generator);
         if(!generatorTotalDelegations) {
-            totalDelegationsByProver.set(totalDelegations[i].generator, new Array<string>());
-        } else {
-            generatorTotalDelegations.push(totalDelegations[i].id);
-            totalDelegationsByProver.set(totalDelegations[i].generator, generatorTotalDelegations);
+            generatorTotalDelegations = new Array<string>();
         }
+        generatorTotalDelegations.push(totalDelegations[i].id);
+        totalDelegationsByProver.set(totalDelegations[i].generator, generatorTotalDelegations);
     }
 
     for(let i=0; i < delegationsByProver.entries.length; i++) {
         let generator = delegationsByProver.entries[i].key;
         let generatorEntity = Generator.load(generator);
         if(generatorEntity == null) {
-            log.warning('Generator not found when saving delegations', [generator]);
-            return;
+            log.warning('Generator {} not found when saving delegations', [generator]);
+            continue;
         }
         
         let delegations = delegationsByProver.entries[i].value;
@@ -77,8 +76,8 @@ export function handleSnapshotConfirmed(event: SnapshotConfirmed): void {
         let generator = totalDelegationsByProver.entries[i].key;
         let generatorEntity = Generator.load(generator);
         if(generatorEntity == null) {
-            log.warning('Generator not found when saving total delegations', [generator]);
-            return;
+            log.warning('Generator {} not found when saving total delegations', [generator]);
+            continue;
         }
 
         let totalDelegations = totalDelegationsByProver.entries[i].value;
@@ -101,17 +100,16 @@ export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): voi
         snapshotEntity.save();
     }
 
-    const snapshotDataDecodedRaw = ethereum.decode("((address,address,address,uint256)[])", snapshotData);
+    const snapshotDataDecodedRaw = ethereum.decode("(address,address,address,uint256)[]", snapshotData);
     if(snapshotDataDecodedRaw == null) {
-        log.error('Failed to decode stake data in snapshot', [snapshotData.toHexString()]);
+        log.error('Failed to decode stake data in snapshot {}', [snapshotData.toHexString()]);
         return;
     }
     const snapshotDataDecodedArray = snapshotDataDecodedRaw.toArray();
     let totalDelegation = new TypedMap<string, TypedMap<string, BigInt>>();
     // iterate decoded snapshot data and save the delegation for each user
     for(let i=0; i < snapshotDataDecodedArray.length; i++) {
-        const snapshotDataDecodedElementRaw = snapshotDataDecodedArray[i];
-        const snapshotDataDecoded = snapshotDataDecodedElementRaw.toTuple();
+        const snapshotDataDecoded = snapshotDataDecodedArray[i].toTuple();
         let generator = snapshotDataDecoded[0].toAddress().toHexString();
         let delegator = snapshotDataDecoded[1].toAddress().toHexString();
         let token = snapshotDataDecoded[2].toAddress().toHexString();
@@ -150,8 +148,8 @@ export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): voi
         let generator = totalDelegation.entries[i].key;
         let generatorEntity = Generator.load(generator);
         if(generatorEntity == null) {
-            log.warning('Generator not found when saving total delegation', [generator]);
-            return;
+            log.warning('Generator {} not found when saving total delegation', [generator]);
+            continue;
         }
 
         let generatorDelegation = totalDelegation.entries[i].value;
@@ -188,8 +186,7 @@ export function handleRegisteredGenerator(event: RegisteredGenerator): void {
         return;
     }
     let generatorList = globalState.generators;
-    generatorList.push(generator.id);
-    globalState.generators = generatorList;
+    globalState.generators = generatorList.concat([generator.id]);
     globalState.save();
 }
 
@@ -197,7 +194,7 @@ export function handleRegisteredGenerator(event: RegisteredGenerator): void {
 export function handleOperatorRewardShareSet(event: OperatorRewardShareSet): void {
     let generator = Generator.load(event.params.operator.toHexString());
     if (generator == null) {
-        log.warning('Generator not found when setting operator reward share', [event.params.operator.toHexString()]);
+        log.warning('Generator {} not found when setting operator reward share', [event.params.operator.toHexString()]);
         return;
     }
 
@@ -224,7 +221,7 @@ export function handleStakeLocked(event: StakeLocked): void {
     }
 
     if(epochState.tokenList.indexOf(task.token) == -1) {
-        epochState.tokenList.push(task.token);
+        epochState.tokenList = epochState.tokenList.concat([task.token]);
     }
     epochState.save();
 }
@@ -234,7 +231,7 @@ export function handleTaskCreated(event: TaskCreated): void {
     let task = Task.load(event.params.askId.toString());
     if (task == null) {
         // Task is created on stake locked event which is handled before this event
-        log.error('Task not found when task was created', [event.params.askId.toString()]);
+        log.error('Task {} not found when task was created', [event.params.askId.toString()]);
         return;
     }
 
@@ -251,7 +248,7 @@ export function handleProofCreated(event: ProofCreated): void {
     // update the task with the completion time
     let task = Task.load(event.params.askId.toString());
     if (task == null) {
-        log.error('Task not found for askId when proof was generated', [event.params.askId.toString()]);
+        log.error('Task {} not found for askId when proof was generated', [event.params.askId.toString()]);
         return;
     }
 
@@ -270,7 +267,7 @@ export function handleProofCreated(event: ProofCreated): void {
     }
 
     jobsPerEpoch.jobCount = jobsPerEpoch.jobCount.plus(BigInt.fromI32(1));
-    jobsPerEpoch.jobs.push(task.id);
+    jobsPerEpoch.jobs = jobsPerEpoch.jobs.concat([task.id]);
     jobsPerEpoch.save();
 
     // add count of jobs completed for this epoch to the global epoch state
@@ -284,7 +281,7 @@ export function handleProofCreated(event: ProofCreated): void {
     }
 
     globalJobsPerEpoch.jobCount = globalJobsPerEpoch.jobCount.plus(BigInt.fromI32(1));
-    globalJobsPerEpoch.jobs.push(task.id);
+    globalJobsPerEpoch.jobs = globalJobsPerEpoch.jobs.concat([task.id]);
     globalJobsPerEpoch.save();
 }
 

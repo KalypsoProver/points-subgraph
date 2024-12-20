@@ -6,14 +6,4 @@ export const GLOBAL_STATE_ID = '1';
 export const POINTS_PER_EPOCH = BigInt.fromI32(500000);
 
 export const ZERO_ADDRESS = Address.fromHexString('0x0000000000000000000000000000000000000000');
-
-export function getTokenShare(token: String): BigInt {
-    // get the token share from the token registry
-    if(token == '0x') {
-        return BigInt.fromI32(1);
-    } else if(token == '0x') {
-        return BigInt.fromI32(1);
-    } else {
-        return BigInt.fromI32(0);
-    }
-}
+export const E18 = BigInt.fromI32(10).pow(18);
