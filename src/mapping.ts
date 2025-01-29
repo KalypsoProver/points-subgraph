@@ -1,8 +1,8 @@
 import { BigInt, log, ethereum, TypedMap } from '@graphprotocol/graph-ts';
 import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch, Delegation, TotalDelegation, Snapshot, EpochState } from '../generated/schema';
-import { ProofCreated, OperatorRewardShareSet, Initialized, TaskCreated } from '../generated/ProofMarketplace/ProofMarketplace';
+import { ProofCreated, ProverRewardShareSet, Initialized, TaskCreated } from '../generated/ProofMarketplace/ProofMarketplace';
 import { SnapshotConfirmed, VaultSnapshotSubmitted, StakeLocked } from '../generated/SymbioticStaking/SymbioticStaking';
-import { RegisteredGenerator } from '../generated/GeneratorRegistry/GeneratorRegistry';
+import { ProverRegistered } from '../generated/ProverManager/ProverManager';
 
 import { EPOCH_LENGTH, GLOBAL_STATE_ID, POINTS_PER_EPOCH, START_TIME, ZERO_ADDRESS } from './constants';
 import { getCurrentEpoch, distributePoints } from './utils';
@@ -169,11 +169,11 @@ export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): voi
     }
 }
 
-export function handleRegisteredGenerator(event: RegisteredGenerator): void {
-    let generator = Generator.load(event.params.generator.toHexString());
+export function handleProverRegistered(event: ProverRegistered): void {
+    let generator = Generator.load(event.params.prover.toHexString());
     if (generator == null) {
-        generator = new Generator(event.params.generator.toHexString());
-        generator.address = event.params.generator.toHexString();
+        generator = new Generator(event.params.prover.toHexString());
+        generator.address = event.params.prover.toHexString();
         generator.commission = BigInt.fromI32(0);
         generator.delegations = [];
         generator.totalDelegation = [];
@@ -191,10 +191,10 @@ export function handleRegisteredGenerator(event: RegisteredGenerator): void {
 }
 
 // Record the commission of the generator
-export function handleOperatorRewardShareSet(event: OperatorRewardShareSet): void {
-    let generator = Generator.load(event.params.operator.toHexString());
+export function handleProverRewardShareSet(event: ProverRewardShareSet): void {
+    let generator = Generator.load(event.params.prover.toHexString());
     if (generator == null) {
-        log.warning('Generator {} not found when setting operator reward share', [event.params.operator.toHexString()]);
+        log.warning('Generator {} not found when setting prover reward share', [event.params.prover.toHexString()]);
         return;
     }
 
@@ -204,9 +204,9 @@ export function handleOperatorRewardShareSet(event: OperatorRewardShareSet): voi
 
 export function handleStakeLocked(event: StakeLocked): void {
     distributePoints(event.block.timestamp);
-    let task = Task.load(event.params.jobId.toString());
+    let task = Task.load(event.params.bidId.toString());
     if (task == null) {
-        task = new Task(event.params.jobId.toString());
+        task = new Task(event.params.bidId.toString());
         task.assignedAt = event.block.timestamp;
         task.epoch = getCurrentEpoch(event.block.timestamp);
         task.token = event.params.token.toHexString();
@@ -228,14 +228,14 @@ export function handleStakeLocked(event: StakeLocked): void {
 
 export function handleTaskCreated(event: TaskCreated): void {
     distributePoints(event.block.timestamp);
-    let task = Task.load(event.params.askId.toString());
+    let task = Task.load(event.params.bidId.toString());
     if (task == null) {
         // Task is created on stake locked event which is handled before this event
-        log.error('Task {} not found when task was created', [event.params.askId.toString()]);
+        log.error('Task {} not found when task was created', [event.params.bidId.toString()]);
         return;
     }
 
-    task.generator = event.params.generator.toHexString();
+    task.generator = event.params.prover.toHexString();
     task.save();
 }
 
@@ -246,9 +246,9 @@ export function handleProofCreated(event: ProofCreated): void {
     const epoch = getCurrentEpoch(currentTimestamp);
 
     // update the task with the completion time
-    let task = Task.load(event.params.askId.toString());
+    let task = Task.load(event.params.bidId.toString());
     if (task == null) {
-        log.error('Task {} not found for askId when proof was generated', [event.params.askId.toString()]);
+        log.error('Task {} not found for askId when proof was generated', [event.params.bidId.toString()]);
         return;
     }
 

@@ -1,32 +1,6 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "contract IERC20",
-        "name": "_paymentToken",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_marketCreationCost",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_treasury",
-        "type": "address"
-      },
-      {
-        "internalType": "contract GeneratorRegistry",
-        "name": "_generatorRegistry",
-        "type": "address"
-      },
-      {
-        "internalType": "contract EntityKeyRegistry",
-        "name": "_entityRegistry",
-        "type": "address"
-      }
-    ],
+    "inputs": [],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
@@ -102,7 +76,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
@@ -159,6 +133,11 @@
   },
   {
     "inputs": [],
+    "name": "ExceedsMaximumMatchtime",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "ExpectedPause",
     "type": "error"
   },
@@ -181,11 +160,6 @@
       }
     ],
     "name": "ImageAlreadyInFamily",
-    "type": "error"
-  },
-  {
-    "inputs": [],
-    "name": "InactiveMarket",
     "type": "error"
   },
   {
@@ -228,11 +202,21 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
     "name": "InvalidProof",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidTimeForProofGeneration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoRewardToClaim",
     "type": "error"
   },
   {
@@ -244,33 +228,33 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
-    "name": "OnlyAssignedAsksCanBeProved",
+    "name": "NotSlashableBidId",
     "type": "error"
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
-    "name": "OnlyExpiredAsksCanBeCancelled",
+    "name": "OnlyAssignedBidsCanBeProved",
     "type": "error"
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
-    "name": "OnlyGeneratorCanDiscardRequest",
+    "name": "OnlyExpiredBidsCanBeCancelled",
     "type": "error"
   },
   {
@@ -282,7 +266,18 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
+        "type": "uint256"
+      }
+    ],
+    "name": "OnlyProverCanDiscardRequest",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
@@ -293,7 +288,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
@@ -320,7 +315,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
@@ -330,17 +325,6 @@
   {
     "inputs": [],
     "name": "ShouldBeInCreateState",
-    "type": "error"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "askId",
-        "type": "uint256"
-      }
-    ],
-    "name": "ShouldBeInCrossedDeadlineState",
     "type": "error"
   },
   {
@@ -403,11 +387,11 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
-    "name": "AskCancelled",
+    "name": "BidCancelled",
     "type": "event"
   },
   {
@@ -416,7 +400,7 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       },
       {
@@ -436,9 +420,28 @@
         "internalType": "bytes",
         "name": "acl",
         "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "extra_data",
+        "type": "bytes"
       }
     ],
-    "name": "AskCreated",
+    "name": "BidCreated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "entityRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "EntityKeyRegistrySet",
     "type": "event"
   },
   {
@@ -460,11 +463,43 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
     "name": "InvalidInputsDetected",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "marketCreationCost",
+        "type": "uint256"
+      }
+    ],
+    "name": "MarketCreationCostSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "marketId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "metadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "MarketMetadataUpdated",
     "type": "event"
   },
   {
@@ -478,44 +513,6 @@
       }
     ],
     "name": "MarketplaceCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "feeRewardAmount",
-        "type": "uint256"
-      }
-    ],
-    "name": "OperatorFeeRewardAdded",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "rewardShare",
-        "type": "uint256"
-      }
-    ],
-    "name": "OperatorRewardShareSet",
     "type": "event"
   },
   {
@@ -536,8 +533,21 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "address",
+        "name": "paymentToken",
+        "type": "address"
+      }
+    ],
+    "name": "PaymentTokenSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       },
       {
@@ -556,11 +566,62 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
     "name": "ProofNotGenerated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "prover",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "feeRewardAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProverFeeRewardAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "proverManager",
+        "type": "address"
+      }
+    ],
+    "name": "ProverManagerSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "prover",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "rewardShare",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProverRewardShareSet",
     "type": "event"
   },
   {
@@ -682,13 +743,13 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "askId",
+        "name": "bidId",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "generator",
+        "name": "prover",
         "type": "address"
       },
       {
@@ -724,6 +785,19 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "treasury",
+        "type": "address"
+      }
+    ],
+    "name": "TreasurySet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "address",
         "name": "account",
@@ -738,7 +812,7 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "enum IProofMarketplace.SecretType",
+        "internalType": "enum Enum.SecretType",
         "name": "secretType",
         "type": "uint8"
       },
@@ -757,7 +831,7 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "enum IProofMarketplace.SecretType",
+        "internalType": "enum Enum.SecretType",
         "name": "secretType",
         "type": "uint8"
       },
@@ -799,58 +873,6 @@
   },
   {
     "inputs": [],
-    "name": "ENTITY_KEY_REGISTRY",
-    "outputs": [
-      {
-        "internalType": "contract EntityKeyRegistry",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "GENERATOR_REGISTRY",
-    "outputs": [
-      {
-        "internalType": "contract GeneratorRegistry",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "MARKET_ACTIVATION_DELAY",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "MARKET_CREATION_COST",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "MATCHING_ENGINE_ROLE",
     "outputs": [
       {
@@ -864,12 +886,51 @@
   },
   {
     "inputs": [],
-    "name": "PAYMENT_TOKEN",
+    "name": "MAX_MATCHING_TIME",
     "outputs": [
       {
-        "internalType": "contract IERC20",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MAX_PROVING_TIME",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "MIN_PROVING_TIME",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "STAKING_MANAGER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "stateMutability": "view",
@@ -931,7 +992,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "marketId",
+        "name": "_marketId",
         "type": "uint256"
       },
       {
@@ -954,24 +1015,28 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "_bidId",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_prover",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_new_acl",
+        "type": "bytes"
       }
     ],
-    "name": "cancelAsk",
+    "name": "assignTask",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "claimableAmount",
+    "inputs": [],
+    "name": "bidCounter",
     "outputs": [
       {
         "internalType": "uint256",
@@ -985,7 +1050,40 @@
   {
     "inputs": [
       {
-        "internalType": "enum IProofMarketplace.SecretType",
+        "internalType": "uint256",
+        "name": "_bidId",
+        "type": "uint256"
+      }
+    ],
+    "name": "cancelBid",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "proverRewardAddress",
+        "type": "address"
+      }
+    ],
+    "name": "claimProverFeeReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "claimTransmitterFeeReward",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum Enum.SecretType",
         "name": "",
         "type": "uint8"
       }
@@ -1022,7 +1120,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "timeTakenForProofGeneration",
+            "name": "timeForProofGeneration",
             "type": "uint256"
           },
           {
@@ -1041,27 +1139,32 @@
             "type": "bytes"
           }
         ],
-        "internalType": "struct ProofMarketplace.Ask",
-        "name": "ask",
+        "internalType": "struct Struct.Bid",
+        "name": "_bid",
         "type": "tuple"
       },
       {
-        "internalType": "enum IProofMarketplace.SecretType",
-        "name": "secretType",
+        "internalType": "enum Enum.SecretType",
+        "name": "_secretType",
         "type": "uint8"
       },
       {
         "internalType": "bytes",
-        "name": "privateInputs",
+        "name": "_privateInputs",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "acl",
+        "name": "_acl",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_extraData",
         "type": "bytes"
       }
     ],
-    "name": "createAsk",
+    "name": "createBid",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1074,14 +1177,9 @@
         "type": "bytes"
       },
       {
-        "internalType": "contract IVerifier",
+        "internalType": "address",
         "name": "_verifier",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_penalty",
-        "type": "uint256"
       },
       {
         "internalType": "bytes",
@@ -1094,7 +1192,7 @@
         "type": "bytes"
       }
     ],
-    "name": "createMarketplace",
+    "name": "createMarket",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1103,7 +1201,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "_bidId",
         "type": "uint256"
       }
     ],
@@ -1131,23 +1229,23 @@
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "entityKeyRegistry",
+    "outputs": [
       {
         "internalType": "address",
-        "name": "_address",
+        "name": "",
         "type": "address"
       }
     ],
-    "name": "flush",
-    "outputs": [],
-    "stateMutability": "nonpayable",
+    "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "marketId",
+        "name": "_marketId",
         "type": "uint256"
       }
     ],
@@ -1160,14 +1258,14 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "_bidId",
         "type": "uint256"
       }
     ],
-    "name": "getAskState",
+    "name": "getBidState",
     "outputs": [
       {
-        "internalType": "enum ProofMarketplace.AskState",
+        "internalType": "enum Enum.BidState",
         "name": "",
         "type": "uint8"
       }
@@ -1178,8 +1276,8 @@
   {
     "inputs": [
       {
-        "internalType": "enum IProofMarketplace.SecretType",
-        "name": "secretType",
+        "internalType": "enum Enum.SecretType",
+        "name": "_secretType",
         "type": "uint8"
       },
       {
@@ -1201,7 +1299,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "timeTakenForProofGeneration",
+            "name": "timeForProofGeneration",
             "type": "uint256"
           },
           {
@@ -1220,18 +1318,18 @@
             "type": "bytes"
           }
         ],
-        "internalType": "struct ProofMarketplace.Ask",
-        "name": "ask",
+        "internalType": "struct Struct.Bid",
+        "name": "_bid",
         "type": "tuple"
       },
       {
         "internalType": "bytes",
-        "name": "privateInputs",
+        "name": "_privateInputs",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "acl",
+        "name": "_acl",
         "type": "bytes"
       }
     ],
@@ -1313,6 +1411,31 @@
         "internalType": "address",
         "name": "_admin",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_paymentToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_proverManager",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_entityKeyRegistry",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_marketCreationCost",
+        "type": "uint256"
       }
     ],
     "name": "initialize",
@@ -1328,7 +1451,7 @@
         "type": "uint256"
       }
     ],
-    "name": "listOfAsk",
+    "name": "listOfBid",
     "outputs": [
       {
         "components": [
@@ -1349,7 +1472,7 @@
           },
           {
             "internalType": "uint256",
-            "name": "timeTakenForProofGeneration",
+            "name": "timeForProofGeneration",
             "type": "uint256"
           },
           {
@@ -1368,12 +1491,12 @@
             "type": "bytes"
           }
         ],
-        "internalType": "struct ProofMarketplace.Ask",
-        "name": "ask",
+        "internalType": "struct Struct.Bid",
+        "name": "bid",
         "type": "tuple"
       },
       {
-        "internalType": "enum ProofMarketplace.AskState",
+        "internalType": "enum Enum.BidState",
         "name": "state",
         "type": "uint8"
       },
@@ -1384,8 +1507,34 @@
       },
       {
         "internalType": "address",
-        "name": "generator",
+        "name": "prover",
         "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "marketCounter",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "marketCreationCost",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1402,7 +1551,7 @@
     "name": "marketData",
     "outputs": [
       {
-        "internalType": "contract IVerifier",
+        "internalType": "address",
         "name": "verifier",
         "type": "address"
       },
@@ -1410,16 +1559,6 @@
         "internalType": "bytes32",
         "name": "proverImageId",
         "type": "bytes32"
-      },
-      {
-        "internalType": "uint256",
-        "name": "slashingPenalty",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "activationBlock",
-        "type": "uint256"
       },
       {
         "internalType": "bytes32",
@@ -1443,7 +1582,7 @@
   {
     "inputs": [
       {
-        "internalType": "enum IProofMarketplace.SecretType",
+        "internalType": "enum Enum.SecretType",
         "name": "",
         "type": "uint8"
       }
@@ -1453,25 +1592,6 @@
       {
         "internalType": "uint256",
         "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      }
-    ],
-    "name": "operatorRewardShares",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "rewardShare",
         "type": "uint256"
       }
     ],
@@ -1500,6 +1620,51 @@
   },
   {
     "inputs": [],
+    "name": "paymentToken",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "proverRewardAddress",
+        "type": "address"
+      }
+    ],
+    "name": "proverClaimableFeeReward",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "proverManager",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "proxiableUUID",
     "outputs": [
       {
@@ -1515,22 +1680,35 @@
     "inputs": [
       {
         "internalType": "uint256[]",
-        "name": "askIds",
+        "name": "_bidIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "refundFees",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "_bidIds",
         "type": "uint256[]"
       },
       {
         "internalType": "address[]",
-        "name": "generators",
+        "name": "_provers",
         "type": "address[]"
       },
       {
         "internalType": "bytes[]",
-        "name": "newAcls",
+        "name": "_newAcls",
         "type": "bytes[]"
       },
       {
         "internalType": "bytes",
-        "name": "signature",
+        "name": "_signature",
         "type": "bytes"
       }
     ],
@@ -1543,7 +1721,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "marketId",
+        "name": "_marketId",
         "type": "uint256"
       },
       {
@@ -1601,8 +1779,34 @@
   {
     "inputs": [
       {
+        "internalType": "address",
+        "name": "_entityKeyRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "setEntityKeyRegistry",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_marketCreationCost",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMarketCreationCost",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes",
-        "name": "pcrs",
+        "name": "_pcrs",
         "type": "bytes"
       }
     ],
@@ -1615,16 +1819,37 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "_paymentToken",
         "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "_rewardShare",
-        "type": "uint256"
       }
     ],
-    "name": "setOperatorRewardShare",
+    "name": "setPaymentToken",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_proverManager",
+        "type": "address"
+      }
+    ],
+    "name": "setProverManager",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
+      }
+    ],
+    "name": "setTreasury",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1633,25 +1858,12 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
-        "type": "uint256"
-      }
-    ],
-    "name": "slashGenerator",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "askId",
+        "name": "_bidId",
         "type": "uint256"
       },
       {
         "internalType": "bytes",
-        "name": "proof",
+        "name": "_proof",
         "type": "bytes"
       }
     ],
@@ -1664,12 +1876,12 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "askId",
+        "name": "_bidId",
         "type": "uint256"
       },
       {
         "internalType": "bytes",
-        "name": "invalidProofSignature",
+        "name": "_invalidProofSignature",
         "type": "bytes"
       }
     ],
@@ -1681,8 +1893,26 @@
   {
     "inputs": [
       {
+        "internalType": "uint256[]",
+        "name": "_taskIds",
+        "type": "uint256[]"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "_proofs",
+        "type": "bytes[]"
+      }
+    ],
+    "name": "submitProofs",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes4",
-        "name": "interfaceId",
+        "name": "_interfaceId",
         "type": "bytes4"
       }
     ],
@@ -1716,6 +1946,38 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "transmitter",
+        "type": "address"
+      }
+    ],
+    "name": "transmitterClaimableFeeReward",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "treasury",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "unpause",
     "outputs": [],
@@ -1725,13 +1987,13 @@
   {
     "inputs": [
       {
-        "internalType": "enum IProofMarketplace.SecretType",
-        "name": "secretType",
+        "internalType": "enum Enum.SecretType",
+        "name": "_secretType",
         "type": "uint8"
       },
       {
         "internalType": "uint256",
-        "name": "costPerByte",
+        "name": "_costPerByte",
         "type": "uint256"
       }
     ],
@@ -1743,13 +2005,31 @@
   {
     "inputs": [
       {
-        "internalType": "enum IProofMarketplace.SecretType",
-        "name": "secretType",
+        "internalType": "uint256",
+        "name": "_marketId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_metadata",
+        "type": "bytes"
+      }
+    ],
+    "name": "updateMarketMetadata",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum Enum.SecretType",
+        "name": "_secretType",
         "type": "uint8"
       },
       {
         "internalType": "uint256",
-        "name": "newProvingTime",
+        "name": "_newProvingTime",
         "type": "uint256"
       }
     ],
@@ -1780,12 +2060,12 @@
     "inputs": [
       {
         "internalType": "bytes",
-        "name": "attestationData",
+        "name": "_attestationData",
         "type": "bytes"
       },
       {
         "internalType": "bytes",
-        "name": "meSignature",
+        "name": "_meSignature",
         "type": "bytes"
       }
     ],

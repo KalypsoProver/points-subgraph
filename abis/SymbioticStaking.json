@@ -1,12 +1,6 @@
 [
   {
-    "inputs": [
-      {
-        "internalType": "contract IGeneratorCallbacks",
-        "name": "_generator_callback",
-        "type": "address"
-      }
-    ],
+    "inputs": [],
     "stateMutability": "nonpayable",
     "type": "constructor"
   },
@@ -40,6 +34,16 @@
       }
     ],
     "name": "AddressEmptyCode",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CannotBeZero",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CooldownPeriodNotPassed",
     "type": "error"
   },
   {
@@ -87,7 +91,47 @@
   },
   {
     "inputs": [],
+    "name": "EnclaveKeyMismatch",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "FailedCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ImageAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ImageNotFound",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InsufficientStakeAmount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidCaptureTimestamp",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidComissionRate",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidImage",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidIndex",
     "type": "error"
   },
   {
@@ -97,7 +141,67 @@
   },
   {
     "inputs": [],
+    "name": "InvalidLastBlockNumber",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPCR0Length",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPCR1Length",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPCR2Length",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPublicKeyLength",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidSignatureLength",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoConfirmedTimestamp",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoStakeTokenAvailableToLock",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoStakeTokensAvailable",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotIdxToSubmit",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "NotInitializing",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotRegisteredBlockNumber",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotRegisteredTransmitter",
     "type": "error"
   },
   {
@@ -118,6 +222,21 @@
   },
   {
     "inputs": [],
+    "name": "SubmissionAlreadyCompleted",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TokenAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "TokenDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "UUPSUnauthorizedCallContext",
     "type": "error"
   },
@@ -133,6 +252,26 @@
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ZeroNumOfTxs",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroStakeTokenSelectionWeightSum",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroToAddress",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZeroTokenAddress",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -142,7 +281,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
@@ -155,7 +294,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "attestationVerifier",
         "type": "address"
@@ -252,37 +391,6 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
-        "name": "jobId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "token",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "JobSlashed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
         "internalType": "address",
         "name": "proofMarketplace",
         "type": "address"
@@ -295,7 +403,7 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "address",
         "name": "rewardDistributor",
         "type": "address"
@@ -438,7 +546,7 @@
         "type": "address"
       },
       {
-        "indexed": false,
+        "indexed": true,
         "internalType": "uint256",
         "name": "confirmedTimestamp",
         "type": "uint256"
@@ -453,13 +561,13 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "jobId",
+        "name": "bidId",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "operator",
+        "name": "prover",
         "type": "address"
       },
       {
@@ -488,7 +596,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "weight",
         "type": "uint256"
@@ -520,7 +628,7 @@
         "type": "address"
       },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
         "name": "weight",
         "type": "uint256"
@@ -535,13 +643,13 @@
       {
         "indexed": true,
         "internalType": "uint256",
-        "name": "jobId",
+        "name": "bidId",
         "type": "uint256"
       },
       {
         "indexed": true,
         "internalType": "address",
-        "name": "operator",
+        "name": "prover",
         "type": "address"
       },
       {
@@ -584,6 +692,37 @@
       }
     ],
     "name": "SubmissionCooldownSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "bidId",
+        "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "prover",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TaskSlashed",
     "type": "event"
   },
   {
@@ -663,38 +802,12 @@
   },
   {
     "inputs": [],
-    "name": "COMPLETE_MASK",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "DEFAULT_ADMIN_ROLE",
     "outputs": [
       {
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "I_GENERATOR_CALLBACK",
-    "outputs": [
-      {
-        "internalType": "contract IGeneratorCallbacks",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -715,7 +828,7 @@
   },
   {
     "inputs": [],
-    "name": "SLASH_RESULT_MASK",
+    "name": "SLASH_RESULT_DONE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -741,7 +854,7 @@
   },
   {
     "inputs": [],
-    "name": "STAKE_SNAPSHOT_MASK",
+    "name": "STAKE_SNAPSHOT_DONE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -755,6 +868,32 @@
   {
     "inputs": [],
     "name": "STAKE_SNAPSHOT_TYPE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "STAKING_MANAGER_ROLE",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "SUBMISSION_COMPLETE",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -881,6 +1020,30 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "captureTimestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "captureTimestampInfo",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "transmitter",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "_idx",
         "type": "uint256"
       }
@@ -892,6 +1055,11 @@
           {
             "internalType": "uint256",
             "name": "captureTimestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
             "type": "uint256"
           },
           {
@@ -926,6 +1094,11 @@
       {
         "internalType": "uint256",
         "name": "captureTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "blockNumber",
         "type": "uint256"
       },
       {
@@ -1040,11 +1213,11 @@
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "prover",
         "type": "address"
       }
     ],
-    "name": "getOperatorActiveStakeAmount",
+    "name": "getProverActiveStakeAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1064,11 +1237,11 @@
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "prover",
         "type": "address"
       }
     ],
-    "name": "getOperatorStakeAmount",
+    "name": "getProverStakeAmount",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1093,11 +1266,11 @@
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "prover",
         "type": "address"
       }
     ],
-    "name": "getOperatorStakeAmountAt",
+    "name": "getProverStakeAmountAt",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1141,7 +1314,7 @@
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "prover",
         "type": "address"
       }
     ],
@@ -1312,7 +1485,33 @@
   },
   {
     "inputs": [],
+    "name": "lastSlashResultBlock",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "latestConfirmedTimestamp",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "latestConfirmedTimestampBlockNumber",
     "outputs": [
       {
         "internalType": "uint256",
@@ -1348,6 +1547,11 @@
             "type": "uint256"
           },
           {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
             "internalType": "address",
             "name": "transmitter",
             "type": "address"
@@ -1370,7 +1574,7 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "jobId",
+        "name": "bidId",
         "type": "uint256"
       }
     ],
@@ -1394,12 +1598,12 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_jobId",
+        "name": "_bidId",
         "type": "uint256"
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "_prover",
         "type": "address"
       }
     ],
@@ -1412,12 +1616,12 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_jobId",
+        "name": "_bidId",
         "type": "uint256"
       },
       {
         "internalType": "address",
-        "name": "_operator",
+        "name": "_prover",
         "type": "address"
       },
       {
@@ -1426,33 +1630,9 @@
         "type": "uint256"
       }
     ],
-    "name": "onJobCompletion",
+    "name": "onTaskCompletion",
     "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "stakeToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "operator",
-        "type": "address"
-      }
-    ],
-    "name": "operatorLockedAmounts",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "locked",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -1469,6 +1649,30 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "stakeToken",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "prover",
+        "type": "address"
+      }
+    ],
+    "name": "proverLockedAmounts",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "locked",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "proxiableUUID",
     "outputs": [
@@ -1476,25 +1680,6 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "captureTimestamp",
-        "type": "uint256"
-      }
-    ],
-    "name": "registeredTransmitters",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "transmitter",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1636,11 +1821,11 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_jobManager",
+        "name": "_proofMarketplace",
         "type": "address"
       }
     ],
-    "name": "setJobManager",
+    "name": "setProofMarketplace",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -1708,12 +1893,12 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "jobId",
+            "name": "bidId",
             "type": "uint256"
           },
           {
             "internalType": "address",
-            "name": "operator",
+            "name": "prover",
             "type": "address"
           },
           {
@@ -1722,8 +1907,8 @@
             "type": "address"
           }
         ],
-        "internalType": "struct Struct.JobSlashed[]",
-        "name": "_slashedJobs",
+        "internalType": "struct Struct.TaskSlashed[]",
+        "name": "_slashedTasks",
         "type": "tuple[]"
       }
     ],
@@ -1799,7 +1984,7 @@
       },
       {
         "internalType": "address",
-        "name": "account",
+        "name": "transmitter",
         "type": "address"
       }
     ],
@@ -1829,6 +2014,11 @@
       {
         "internalType": "uint256",
         "name": "_captureTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_lastBlockNumber",
         "type": "uint256"
       },
       {
@@ -1894,7 +2084,7 @@
     "inputs": [
       {
         "internalType": "bytes4",
-        "name": "interfaceId",
+        "name": "_interfaceId",
         "type": "bytes4"
       }
     ],
