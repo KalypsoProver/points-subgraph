@@ -5,7 +5,8 @@
     "auth": "graph auth --product subgraph-studio ",
     "build": "graph build",
     "codegen": "graph codegen",
-    "deploy": "graph deploy kalypso-points"
+    "deploy": "graph deploy kalypso-points",
+    "deploy-testnet": "graph deploy kalypso-points-testnet subgraph-arbSep.yaml"
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "^0.87.0",
