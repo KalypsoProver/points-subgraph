@@ -23,8 +23,6 @@ dataSources:
         - name: ProofMarketplace
           file: ./abis/ProofMarketplace.json
       eventHandlers:
-        - event: ProverRewardShareSet(indexed address,uint256)
-          handler: handleProverRewardShareSet
         - event: ProofCreated(indexed uint256,bytes)
           handler: handleProofCreated
         - event: TaskCreated(indexed uint256,indexed address,bytes)
@@ -77,3 +75,5 @@ dataSources:
       eventHandlers:
         - event: ProverRegistered(indexed address,uint256,bytes)
           handler: handleProverRegistered
+        - event: ProverJoinedMarketplace(indexed address,indexed uint256,uint256,uint256)
+          handler: handleProverJoinedMarketplace

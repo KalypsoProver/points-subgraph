@@ -1,5 +1,5 @@
 import { BigInt, log, TypedMap } from '@graphprotocol/graph-ts';
-import { Delegation, EpochState, Generator, GlobalState, JobsPerEpoch, TotalDelegation, TotalJobsPerEpoch, User } from '../generated/schema';
+import { Delegation, EpochState, Generator, GeneratorMarketInfo, GlobalState, JobsPerEpoch, TotalDelegation, TotalJobsPerEpoch, User } from '../generated/schema';
 
 import { E18, GLOBAL_STATE_ID } from './constants';
 
@@ -99,13 +99,15 @@ function distributePointsForEpoch(epoch: BigInt): void {
             generatorUserEntity.points = BigInt.fromI32(0);
         }
 
-        let generatorEntity = Generator.load(generator);
-        if(generatorEntity == null) {
-            log.warning('Generator {} not registered when distributing rewards', [generator]);
+        // TODO: Introduce commission by market
+        let generatorMarketEntity = GeneratorMarketInfo.load(generator+'-'+BigInt.fromI32(1).toString());
+        if(generatorMarketEntity == null) {
+            log.warning('Generator {} commission not registered when distributing rewards', [generator]);
             continue;
         }
+        const commission = generatorMarketEntity.commission;
 
-        const generatorShare = reward.times(generatorEntity.commission).div(E18);
+        const generatorShare = reward.times(commission).div(E18);
         generatorUserEntity.points = generatorUserEntity.points.plus(generatorShare);
         generatorUserEntity.save();
         reward = reward.minus(generatorShare);
@@ -125,6 +127,11 @@ function distributePointsForEpoch(epoch: BigInt): void {
             rewardsPerToken.set(token, rewardForToken.times(E18).div(totalDelegationForToken.amount));
         }
 
+        const generatorEntity = Generator.load(generator);
+        if(generatorEntity == null) {
+            log.warning('Generator {} not found when distributing rewards', [generator]);
+            continue;
+        }
         const delegations = generatorEntity.delegations;
         for(let j=0; j < delegations.length; j++) {
             const delegationId = delegations[j];

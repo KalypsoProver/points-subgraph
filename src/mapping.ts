@@ -1,8 +1,8 @@
 import { BigInt, log, ethereum, TypedMap } from '@graphprotocol/graph-ts';
-import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch, Delegation, TotalDelegation, Snapshot, EpochState } from '../generated/schema';
+import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch, Delegation, TotalDelegation, Snapshot, EpochState, GeneratorMarketInfo } from '../generated/schema';
 import { ProofCreated, ProverRewardShareSet, Initialized, TaskCreated } from '../generated/ProofMarketplace/ProofMarketplace';
 import { SnapshotConfirmed, VaultSnapshotSubmitted, StakeLocked } from '../generated/SymbioticStaking/SymbioticStaking';
-import { ProverRegistered } from '../generated/ProverManager/ProverManager';
+import { ProverJoinedMarketplace, ProverRegistered } from '../generated/ProverManager/ProverManager';
 
 import { EPOCH_LENGTH, GLOBAL_STATE_ID, POINTS_PER_EPOCH, START_TIME, ZERO_ADDRESS } from './constants';
 import { getCurrentEpoch, distributePoints } from './utils';
@@ -174,7 +174,6 @@ export function handleProverRegistered(event: ProverRegistered): void {
     if (generator == null) {
         generator = new Generator(event.params.prover.toHexString());
         generator.address = event.params.prover.toHexString();
-        generator.commission = BigInt.fromI32(0);
         generator.delegations = [];
         generator.totalDelegation = [];
         generator.save();
@@ -190,16 +189,29 @@ export function handleProverRegistered(event: ProverRegistered): void {
     globalState.save();
 }
 
-// Record the commission of the generator
-export function handleProverRewardShareSet(event: ProverRewardShareSet): void {
+export function handleProverJoinedMarketplace(event: ProverJoinedMarketplace): void {
     let generator = Generator.load(event.params.prover.toHexString());
     if (generator == null) {
-        log.warning('Generator {} not found when setting prover reward share', [event.params.prover.toHexString()]);
-        return;
+        generator = new Generator(event.params.prover.toHexString());
+        generator.address = event.params.prover.toHexString();
+        generator.delegations = [];
+        generator.totalDelegation = [];
+        generator.save();
     }
 
-    generator.commission = event.params.rewardShare;
-    generator.save();
+    let globalState = GlobalState.load(GLOBAL_STATE_ID);
+    if (globalState == null) {
+        log.error('Global state not initialized', []);
+        return;
+    }
+    let marketInfo = GeneratorMarketInfo.load(event.params.prover.toHexString()+ '-' + event.params.marketId.toString());
+    if (marketInfo == null) {
+        marketInfo = new GeneratorMarketInfo(event.params.prover.toHexString()+ '-' + event.params.marketId.toString());
+        marketInfo.generator = event.params.prover.toHexString();
+        marketInfo.marketId = event.params.marketId;
+    }
+    marketInfo.commission = event.params.commission;
+    marketInfo.save();
 }
 
 export function handleStakeLocked(event: StakeLocked): void {
@@ -294,7 +306,7 @@ export function handleInitialized(event: Initialized): void {
         globalState.startTime = START_TIME;
         globalState.epochLength = EPOCH_LENGTH;
         globalState.generators = [];
-        globalState.pointsDistributedTillEpoch = BigInt.fromI32(0);
+        globalState.pointsDistributedTillEpoch = BigInt.fromI32(-1);
         globalState.confirmedSnapshots = [];
         globalState.save();
     }

@@ -44,11 +44,18 @@ type TotalDelegation @entity {
 type Generator @entity {
   id: ID!
   address: String!
-  commission: BigInt!
+  marketInfo: [GeneratorMarketInfo!]! @derivedFrom(field: "generator")
   tasks: [Task!]! @derivedFrom(field: "generator")
   jobsByEpoch: [JobsPerEpoch!]! @derivedFrom(field: "address")
   delegations: [Delegation!]!
   totalDelegation: [TotalDelegation!]!
+}
+
+type GeneratorMarketInfo @entity {
+  id: ID!
+  marketId: BigInt!
+  generator: Generator!
+  commission: BigInt!
 }
 
 type Task @entity {
