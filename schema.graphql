@@ -84,6 +84,22 @@ type TotalJobsPerEpoch @entity {
   jobs: [Task!]!
 }
 
+type PointsByEpoch @entity {
+  id: ID!
+  address: String!
+  epoch: BigInt!
+  points: BigInt!
+  pointsByGenerator: [PointsByGenerator!]!
+}
+
+type PointsByGenerator @entity {
+  id: ID!
+  address: String!
+  epoch: BigInt!
+  generator: String!
+  points: BigInt!
+}
+
 type User @entity {
   id: ID!
   address: String!
