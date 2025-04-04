@@ -1,5 +1,5 @@
 import { BigInt, log, ethereum, TypedMap } from '@graphprotocol/graph-ts';
-import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch, Delegation, TotalDelegation, Snapshot, EpochState, GeneratorMarketInfo } from '../generated/schema';
+import { GlobalState, JobsPerEpoch, Task, Generator, TotalJobsPerEpoch, Delegation, TotalDelegation, Snapshot, EpochState, GeneratorMarketInfo, User } from '../generated/schema';
 import { ProofCreated, ProverRewardShareSet, Initialized, TaskCreated } from '../generated/ProofMarketplace/ProofMarketplace';
 import { SnapshotConfirmed, VaultSnapshotSubmitted, StakeLocked } from '../generated/SymbioticStaking/SymbioticStaking';
 import { ProverJoinedMarketplace, ProverRegistered } from '../generated/ProverManager/ProverManager';
@@ -114,6 +114,28 @@ export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): voi
         let delegator = snapshotDataDecoded[1].toAddress().toHexString();
         let token = snapshotDataDecoded[2].toAddress().toHexString();
         let amount = snapshotDataDecoded[3].toBigInt();
+
+        // check if the generator is registered
+        // if not, create a new generator entity
+        let generatorEntity = Generator.load(generator);
+        if (generatorEntity == null) {
+            generatorEntity = new Generator(generator);
+            generatorEntity.address = generator;
+            generatorEntity.delegations = [];
+            generatorEntity.totalDelegation = [];
+            generatorEntity.save();
+        }
+
+        // check if the delegator exists
+        // if not, create a new user entity
+        // and set the points to 0
+        let delegatorEntity = User.load(delegator);
+        if (delegatorEntity == null) {
+            delegatorEntity = new User(delegator);
+            delegatorEntity.address = delegator;
+            delegatorEntity.points = BigInt.fromI32(0);
+            delegatorEntity.save();
+        }
 
         // create userDelegation entity for each user
         let userDelegation = Delegation.load(delegator + '-' + generator + '-' + token + '-' + snapshotTs.toString());
