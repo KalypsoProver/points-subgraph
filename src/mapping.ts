@@ -115,6 +115,12 @@ export function handleVaultSnapshotSubmitted(event: VaultSnapshotSubmitted): voi
         let token = snapshotDataDecoded[2].toAddress().toHexString();
         let amount = snapshotDataDecoded[3].toBigInt();
 
+        // Validate addresses are not null or empty
+        if (!generator || generator.length == 0 || !delegator || delegator.length == 0 || !token || token.length == 0) {
+            log.warning('Invalid snapshot data: generator={}, delegator={}, token={}, amount={}', [generator, delegator, token, amount.toString()]);
+            continue;
+        }
+
         // check if the generator is registered
         // if not, create a new generator entity
         let generatorEntity = Generator.load(generator);

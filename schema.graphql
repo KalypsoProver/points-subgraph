@@ -27,7 +27,7 @@ type EpochState @entity {
 type Delegation @entity {
   id: ID!
   generator: Generator!
-  delegator: User!
+  delegator: String!
   token: String!
   amount: BigInt!
   snapshot: Snapshot!

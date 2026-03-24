@@ -54,6 +54,10 @@ function distributePointsForEpoch(epoch: BigInt): void {
         return;
     }
     let totalJobs = totalJobsPerEpoch.jobCount;
+    if(totalJobs.equals(BigInt.fromI32(0))) {
+        log.info('Total jobs is zero for epoch {}', [epoch.toString()]);
+        return;
+    }
 
     // 2. Get the list of generators
     let globalState = GlobalState.load(GLOBAL_STATE_ID);
@@ -93,6 +97,10 @@ function distributePointsForEpoch(epoch: BigInt): void {
             }
             totalGeneratorJobsInEpoch = totalGeneratorJobsInEpoch.plus(jobsPerEpoch.jobCount);
             generatorJobsPerToken.set(token, jobsPerEpoch.jobCount);
+        }
+
+        if(totalGeneratorJobsInEpoch.equals(BigInt.fromI32(0))) {
+            continue;
         }
 
         let reward = globalState.pointsPerEpoch.times(totalGeneratorJobsInEpoch).div(totalJobs);
@@ -139,6 +147,10 @@ function distributePointsForEpoch(epoch: BigInt): void {
             let totalDelegationForToken = TotalDelegation.load(generator + '-' + token + '-' + latestSnapshot.toString());
             if(totalDelegationForToken == null) {
                 log.warning('Total delegation not found for generator {} using token {} in the snapshot {}', [generator, token, latestSnapshot.toString()]);
+                continue;
+            }
+            if(totalDelegationForToken.amount.equals(BigInt.fromI32(0))) {
+                log.warning('Total delegation is zero for generator {} using token {} in the snapshot {}', [generator, token, latestSnapshot.toString()]);
                 continue;
             }
 
